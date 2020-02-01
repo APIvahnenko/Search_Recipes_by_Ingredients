@@ -1,39 +1,81 @@
 #!/usr/bin/env python3
 
+import pymysql
+from VariableByteEncoder import *
+
 class Database:
-    def __init__():
-        # Call Database.Connect().
-        # Call Database.CreateTermIndexTable().
-        # Call Database.CreateWebPageInfoTable().
-        
-        return None
+    database = None
+    cursor   = None
     
-    def __del__():
-        # Disconnect from Database if required.
-        
-        return None
+    def __init__(self, databaseName):
+        self.database = pymysql.connect("localhost", "root", "", databaseName)
+        self.cursor   = self.database.cursor()
+        self.CreateIngredientIndexTable()
+        self.CreateRecipeInfoTable()
     
-    def Connect(self):
-        return None
+    def __del__(self):
+        self.database.close()
         
-    def CreateTermIndexTable(self):
-        # Do not create table if it already exists?
-        
-        return None
-        
-    def CreateWebPageInfoTable(self):
-        # Do not create table if it already exists?
-        
-        return None
-        
-    def AddToTermIndexTable(self, sortedTermSequence):
-        return None
-        
-    def DeleteFromTermIndexTable(self):
-        return None
+    def CreateIngredientIndexTable(self):
+        self.cursor.execute("DROP TABLE IF EXISTS ingredient_index")
+        self.cursor.execute("""CREATE TABLE ingredient_index (
+                               ingredient VARCHAR(255),
+                               recipe_ids BLOB)""")
     
-    def AddToWebPageInfoTable(self):
-        return None
+    def CreateRecipeInfoTable(self):
+        self.cursor.execute("DROP TABLE IF EXISTS recipe_info")
+        self.cursor.execute("""CREATE TABLE recipe_info (
+                               recipe_id        VARCHAR(255),    
+                               recipe_url       VARCHAR(255),    
+                               image_url        VARCHAR(255),    
+                               title            VARCHAR(255),    
+                               description      VARCHAR(255),    
+                               preparation_time TIME,            
+                               cook_time        TIME,            
+                               serving_count    TINYINT UNSIGNED,
+                               ingredient_count TINYINT UNSIGNED,
+                               average_rating   TINYINT UNSIGNED,
+                               review_count     SMALLINT UNSIGNED)""")
     
-    def DeleteFromWebPageInfoTable(self):
-        return None
+    def AddToIngredientIndexTable(self, ingredient, recipeId):
+        recipeIds = []
+        
+        self.cursor.execute("SELECT count(*)      \
+                             FROM ingredient_index\
+                             WHERE ingredient = %s", ingredient)
+        
+        if self.cursor.fetchone()[0] == 0:    # If it is a new ingredient.
+            recipeIds.append(recipeId)
+            self.cursor.execute("INSERT INTO ingredient_index\
+                                 (ingredient, recipe_ids)    \
+                                 VALUES (%s, %s)", (ingredient, encode(recipeIds)))
+        else:
+            self.cursor.execute("SELECT recipe_ids    \
+                                 FROM ingredient_index\
+                                 WHERE ingredient = %s", ingredient)
+            recipeIds = decode(self.cursor.fetchone()[0])
+            recipeIds.append(recipeId)
+            self.cursor.execute("UPDATE ingredient_index\
+                                 SET recipe_ids = %s    \
+                                 WHERE ingredient = %s", (encode(recipeIds), ingredient))
+        
+        self.database.commit()
+    
+    def AddToRecipeInfoTable(self, recipeId, recipeUrl, imageUrl, title,
+                             description, preparationTime, cookTime, servingCount,
+                             ingredientCount, averageRating, reviewCount):
+        
+        self.cursor.execute("""INSERT INTO recipe_info
+                               (recipe_id, recipe_url, image_url, title, description,
+                                preparation_time, cook_time, serving_count, ingredient_count,
+                                average_rating, review_count)
+                               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                                      (recipeId, recipeUrl, imageUrl, title, description,
+                                       preparationTime, cookTime, servingCount, average_rating,
+                                       review_count))
+    
+    def GetRecipeIds(self, ingredient):
+        self.cursor.execute("SELECT recipe_ids    \
+                             FROM ingredient_index\
+                             WHERE ingredient = %s", ingredient)
+        return decode(self.cursor.fetchone()[0])    
