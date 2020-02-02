@@ -25,17 +25,15 @@ class Database:
     def CreateRecipeInfoTable(self):
         self.cursor.execute("DROP TABLE IF EXISTS recipe_info")
         self.cursor.execute("""CREATE TABLE recipe_info (
-                               recipe_id        VARCHAR(255),    
+                               recipe_id        MEDIUMINT UNSIGNED,    
                                recipe_url       VARCHAR(255),    
                                image_url        VARCHAR(255),    
                                title            VARCHAR(255),    
-                               description      VARCHAR(255),    
-                               preparation_time TIME,            
-                               cook_time        TIME,            
-                               serving_count    TINYINT UNSIGNED,
-                               ingredient_count TINYINT UNSIGNED,
-                               average_rating   TINYINT UNSIGNED,
-                               review_count     SMALLINT UNSIGNED)""")
+                               description      VARCHAR(1000),    
+                               preparation_time SMALLINT UNSIGNED,            
+                               cook_time        SMALLINT UNSIGNED,            
+                               serving_count    SMALLINT UNSIGNED,
+                               ingredient_count TINYINT UNSIGNED)""")
     
     def AddToIngredientIndexTable(self, ingredient, recipeId):
         recipeIds = []
@@ -61,18 +59,15 @@ class Database:
         
         self.database.commit()
     
-    def AddToRecipeInfoTable(self, recipeId, recipeUrl, imageUrl, title,
-                             description, preparationTime, cookTime, servingCount,
-                             ingredientCount, averageRating, reviewCount):
-        
+    def AddToRecipeInfoTable(self, recipeId, recipeUrl, imageUrl, title, description,
+                             preparationTime, cookTime, servingCount, ingredientCount):
         self.cursor.execute("""INSERT INTO recipe_info
                                (recipe_id, recipe_url, image_url, title, description,
-                                preparation_time, cook_time, serving_count, ingredient_count,
-                                average_rating, review_count)
-                               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                                preparation_time, cook_time, serving_count, ingredient_count)
+                               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                                       (recipeId, recipeUrl, imageUrl, title, description,
-                                       preparationTime, cookTime, servingCount, average_rating,
-                                       review_count))
+                                       preparationTime, cookTime, servingCount, ingredientCount))
+        self.database.commit()
     
     def GetRecipeIds(self, ingredient):
         self.cursor.execute("SELECT recipe_ids    \
