@@ -20,7 +20,7 @@ class RecipeParser:
     
     def cleaning_ing_list(self, ingredients):
         #getting a list of stop phrases
-        stop_phrases = [stop_words.rstrip('\n') for stop_words in open("recipe_stopwords.txt", 'r', encoding = "utf-16")]
+        stop_words = [stop_words.rstrip('\n') for stop_words in open("recipe_stopwords.txt", 'r', encoding = "utf-16")]
         final_list   = []
         
         for ing in ingredients:
@@ -37,7 +37,7 @@ class RecipeParser:
             ing_words = pattern.findall(ing)
             
             #removing stopwords
-            filtered_ing = [w for w in ing_words if w not in stop_phrases]
+            filtered_ing = [w for w in ing_words if w not in stop_words]
             
             #stemming
             clean_ing = []
@@ -198,22 +198,22 @@ class RecipeParser:
                     
                     #looking at the possitions of word in line
                     if "for" in line_words:
-                        pos_for = line.find("for")
-                        pos_or  = line.find("or", 1)
+                        pos_for = line.find(" for")
+                        pos_or  = line.find(" or", 1)
                         
                         if pos_for > pos_or:
-                            primary_ing, alternative = line.split("or", 1)
-                            alt_ing, why_needed      = alternative.split("for", 1)
+                            primary_ing, alternative = line.split(" or", 1)
+                            alt_ing, why_needed      = alternative.split(" for", 1)
                             ingredients.extend([primary_ing, alt_ing])
                             #not counting alternative ingridient
                     
                         else:
-                            primary_ing, why_needed = line.split("for", 1)
+                            primary_ing, why_needed = line.split(" for", 1)
                             ingredients.append(primary_ing) 
                             #excluding why ingredient is needed
                         
                     else:
-                        primary_ing, alt_ing = line.split("or", 1)
+                        primary_ing, alt_ing = line.split(" or", 1)
                         ingredients.extend([primary_ing, alt_ing])
                         #not counting alternative ingridient
 
