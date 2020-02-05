@@ -32,24 +32,10 @@ class RecipeParser:
                 clean_ing, extra = ing.split(',', 1)
                 ing = clean_ing
             
-            #getting ing discription words
-            ing_words = ing.split()
-
-            #getting all amount values
-            i = 0
-            amounts = []
-            for w in ing_words:
-                
-                #if first char in line is a digit
-                if w[0].isdigit(): 
-                    amounts.append(ing_words[i])
-                    i+=1
-                    
-            #removing the amount values of the ingredient
-            if amounts:
-                for a in amounts:
-                    ing_words.remove(a)
-
+            #ing only words
+            pattern = re.compile(r"\b[a-zA-Z-]+\b")
+            ing_words = pattern.findall(ing)
+            
             #removing stopwords
             filtered_ing = [w for w in ing_words if w not in stop_phrases]
             
@@ -59,7 +45,13 @@ class RecipeParser:
                 clean_ing.append(self.ps.stem(word))
             
             #lower caseing & appending
-            final_list.append(' '.join(clean_ing).lower())
+            if len(clean_ing) > 0:
+                list_of_ing.append(' '.join(clean_ing).lower())
+        
+        final_list = []
+        final_set = set(list_of_ing)
+        for item in final_set:
+            final_list.append(item)
             
         return final_list
     
@@ -185,7 +177,12 @@ class RecipeParser:
                     primary_ing, extra_ing = line.split("and", 1)
                     ingredients.extend([primary_ing, extra_ing])
                     ing_num += 1 #count extra ing
-                    
+                
+                elif "and/or" in line_words:
+                    primary_ing, alt_ing = line.split("and/or", 1)
+                    ingredients.extend([primary_ing, alt_ing])
+                    #not counting alternative ingridient
+                
                 elif "plus extra" in line:
                     primary_ing, extra_same = line.split("plus extra", 1)
                     ingredients.append(primary_ing) 
