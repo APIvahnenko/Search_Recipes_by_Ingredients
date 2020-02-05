@@ -112,7 +112,7 @@ class Spider:
                     #recipe_content = soup.find("p",{"class":"margin-0-auto"}).text
                 #finally:
                     recipe_content = "None"
-                f.write(recipe_content+"\n")
+                f.write(recipe_content+"\n"+"preptime:-\n")
                 try:
                     prep_time = soup.find("time",{"itemprop":"prepTime"}).text
                 except:
@@ -120,7 +120,7 @@ class Spider:
                     #prep_time = recipe_time[0].text
                 #finally:
                     prep_time = "None"
-                f.write("preptime: "+prep_time+"\n")
+                f.write(prep_time+"\n")
                 try:
                     cook_time = soup.find("time",{"itemprop":"cookTime"}).text
                 except:
@@ -155,7 +155,7 @@ class Spider:
                 #finally:
                     ingre = "None"
                 f.write(ingre)
-                eol="*****"
+                eol="*****eol*****"
 
                 f.write(eol+"\n")
 
