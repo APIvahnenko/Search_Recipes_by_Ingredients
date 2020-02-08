@@ -5,18 +5,16 @@ from nltk.stem import PorterStemmer
 from Database import *
 
 class RecipeParser:
-    recipeFile       = "content.txt"
+    recipeFiles      = ["recepie_project/ttds-project-bbc/content.txt",
+                        "recepie_project_epicurious/ttds-project/contents.txt"]
     recipeFileHandle = None
     database         = None
     ps               = None
+    recipe_id        = 0
     
     def __init__(self):
-        self.recipeFileHandle = open(self.recipeFile, 'r', encoding = "utf-8")
-        self.database         = Database("recipes")
-        self.ps               = PorterStemmer()
-    
-    def __del__(self):
-        self.recipeFileHandle.close()
+        self.database = Database("recipes")
+        self.ps       = PorterStemmer()
     
     def cleaning_ing_list(self, ingredients):
         #getting a list of stop phrases
@@ -90,7 +88,6 @@ class RecipeParser:
     def ParseRecipeFile(self):
         line_num    = 1
         ing_num     = 0
-        recipe_id   = 0
         ingredients = []
         description = ""
         
@@ -98,8 +95,8 @@ class RecipeParser:
             if line_num == 1:
                 url = line
                 #print("URL: ", url)
-                recipe_id += 1
-                line_num  += 1
+                self.recipe_id += 1
+                line_num       += 1
                 continue
         
             if line_num == 2:
@@ -154,9 +151,9 @@ class RecipeParser:
                 #print("-----")
                 
                 for ingredient in clean_ingredients:
-                    self.database.AddToIngredientIndexTable(ingredient, recipe_id)
+                    self.database.AddToIngredientIndexTable(ingredient, self.recipe_id)
                 
-                self.database.AddToRecipeInfoTable(recipe_id, url, img_url, title, description,
+                self.database.AddToRecipeInfoTable(self.recipe_id, url, img_url, title, description,
                                                    prep_time, cook_time, servings, len(clean_ingredients))
                 
                 line_num    = 1
@@ -226,3 +223,9 @@ class RecipeParser:
 
             else:
                 print("error")
+        
+    def ParseRecipeFiles(self):
+        for recipeFile in self.recipeFiles:
+            self.recipeFileHandle = open(recipeFile, 'r', encoding = "utf-8")
+            self.ParseRecipeFile()
+            self.recipeFileHandle.close()
