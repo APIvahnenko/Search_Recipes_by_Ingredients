@@ -35,9 +35,10 @@ class Spider:
     @staticmethod
     def boot():
         create_project_dir(Spider.project_name)
-        create_data_files(Spider.project_name, Spider.base_url)
+        existing_status = create_data_files(Spider.project_name, Spider.base_url)
         Spider.queue = file_to_set(Spider.queue_file)
         Spider.crawled = file_to_set(Spider.crawled_file)
+        return existing_status
 
     # Updates user display, fills queue and updates files
     @staticmethod
