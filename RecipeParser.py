@@ -6,7 +6,8 @@ from Database import *
 
 class RecipeParser:
     recipeFiles      = ["recepie_project/ttds-project-bbc/content.txt",
-                        "recepie_project_epicurious/ttds-project/contents.txt"]
+                        "recepie_project_epicurious/ttds-project/contents.txt",
+                        "recipe_myrecipes.com_project/ttds-project/myrecipes_content.txt"]
     recipeFileHandle = None
     database         = None
     ps               = None
@@ -205,22 +206,22 @@ class RecipeParser:
 
                     #looking at the possitions of word in line
                     if "for" in line_words:
-                        pos_for = line.find(" for")
-                        pos_or  = line.find(" or", 1)
+                        pos_for = line.find(" for ")
+                        pos_or  = line.find(" or ", 1)
 
                         if pos_for > pos_or:
-                            primary_ing, alternative = line.split(" or", 1)
-                            alt_ing, why_needed      = alternative.split(" for", 1)
+                            primary_ing, alternative = line.split(" or ", 1)
+                            alt_ing, why_needed      = alternative.split(" for ", 1)
                             ingredients.extend([primary_ing, alt_ing])
                             #not counting alternative ingridient
 
                         else:
-                            primary_ing, why_needed = line.split(" for", 1)
+                            primary_ing, why_needed = line.split(" for ", 1)
                             ingredients.append(primary_ing)
                             #excluding why ingredient is needed
 
                     else:
-                        primary_ing, alt_ing = line.split(" or", 1)
+                        primary_ing, alt_ing = line.split(" or ", 1)
                         ingredients.extend([primary_ing, alt_ing])
                         #not counting alternative ingridient
 
