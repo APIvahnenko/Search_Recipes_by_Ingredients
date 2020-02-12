@@ -3,4 +3,4 @@
 from RecipeParser import *
 
 recipeParser = RecipeParser()
-recipeParser.ParseRecipeFile()
+recipeParser.ParseRecipeFiles()

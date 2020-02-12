@@ -35,9 +35,10 @@ class Spider:
     @staticmethod
     def boot():
         create_project_dir(Spider.project_name)
-        create_data_files(Spider.project_name, Spider.base_url)
+        existing_status = create_data_files(Spider.project_name, Spider.base_url)
         Spider.queue = file_to_set(Spider.queue_file)
         Spider.crawled = file_to_set(Spider.crawled_file)
+        return existing_status
 
     # Updates user display, fills queue and updates files
     @staticmethod
@@ -105,7 +106,7 @@ class Spider:
                 #    recipe_title = soup.find("h1",{"class":"headline heading-content"}).text
 
                     recipe_title = "None"
-                f.write(recipe_title)
+                f.write(recipe_title+"\n")
 
                 try:
                     recipe_content = soup.find("div",{"class":"dek"}).find('p').text
@@ -113,7 +114,7 @@ class Spider:
                     #recipe_content = soup.find("p",{"class":"margin-0-auto"}).text
                 #finally:
                     recipe_content = "None"
-                f.write(recipe_content+"\n")
+                f.write(recipe_content+"\n"+"preptime:-\n")
                 try:
                     prep_time = randint(5,20)
 
@@ -122,7 +123,7 @@ class Spider:
                 except:
                     pass
                     #prep_time = "None"
-                f.write("preptime: "+str(prep_time)+" m"+"\n")
+                f.write(str(prep_time)+" m"+"\n")
 
                 try:
                     cook_time = randint(30,120)
