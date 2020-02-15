@@ -19,7 +19,7 @@ class RecipeParser:
 
     def cleaning_ing_list(self, ingredients):
         #getting a list of stop phrases
-        stop_words = [stop_words.rstrip('\n') for stop_words in open("recipe_stopwords.txt", 'r', encoding = "utf-16")]
+        stop_words = [stop_words.rstrip('\n') for stop_words in open("recipe_stopwords.txt", 'r', encoding = "utf-8")]
         list_of_ing = []
 
         for ing in ingredients:
@@ -54,6 +54,30 @@ class RecipeParser:
             final_list.append(item)
 
         return final_list
+
+    def recipe_class(self, title, discription_text):
+
+        #discription words
+        discript = title + " " + discription_text
+        discription = re.sub(r'[^\w\s]',' ',discript).lower() #removes punctuation, lower case
+
+        #specified class labels
+        classes = [stop_words.rstrip('\n') for stop_words in open("classes.txt", 'r', encoding = "utf-8")]
+
+        labels = []
+
+        #if the discription contains a specified class
+        for label in classes:
+            if label in discription:
+
+                #if middle eastern (do not classify as easter)
+                if 'middle eastern' in labels:
+                    if label == 'easter':
+                        continue
+                else:
+                    labels.append(label)
+
+        return labels
 
     def clean_time(self, string, url):
         h_match  = re.findall(r"([0-9]+\s?[h]+)", string, re.I)
@@ -155,12 +179,18 @@ class RecipeParser:
                 continue
 
             if "*****eol*****" in line:
-                clean_ingredients = self.cleaning_ing_list(ingredients)
+                clean_ingredients = self.cleaning_ing_list(ingredients) #clean list of ingredients
+                labels = self.recipe_class(title, description) #label based on title and discription
+
+                #label exists add the class as an ingredient
+                if labels:
+                    clean_ingredients = clean_ingredients + labels
 
                 #print("ingredients: ", clean_ingredients)
                 #print("\nnum of ingredients: ", ing_num)
                 #print("-----")
 
+                #store values in database
                 for ingredient in clean_ingredients:
                     self.database.AddToIngredientIndexTable(ingredient, self.recipe_id)
 
@@ -200,9 +230,12 @@ class RecipeParser:
                         print("plus extra error line: ", line)
 
                 elif "plus" in line_words:
-                    primary_ing, extra_ing = line.split(" plus ", 1)
-                    ingredients.extend([primary_ing, extra_ing])
-                    ing_num += 1 #count extra ing
+                    try:
+                        primary_ing, extra_ing = line.split(" plus ", 1)
+                        ingredients.extend([primary_ing, extra_ing])
+                        ing_num += 1 #count extra ing
+                    except:
+                        print("plus extra error line: ", line)
 
                 #dure to the similarity in spelling for and or are special case
                 elif "or" in line_words:
@@ -225,9 +258,12 @@ class RecipeParser:
                             #excluding why ingredient is needed
 
                     else:
-                        primary_ing, alt_ing = line.split(" or ", 1)
-                        ingredients.extend([primary_ing, alt_ing])
-                        #not counting alternative ingridient
+                        try:
+                            primary_ing, alt_ing = line.split(" or ", 1)
+                            ingredients.extend([primary_ing, alt_ing])
+                            #not counting alternative ingridient
+                        except:
+                            print("error in OR: ", line)
 
                 else:
                     ingredients.append(line)
