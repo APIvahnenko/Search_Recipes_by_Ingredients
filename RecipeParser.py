@@ -6,8 +6,15 @@ from Database import *
 
 class RecipeParser:
     recipeFiles      = ["recepie_project/ttds-project-bbc/content.txt",
+                        "recepie_project_all_recipes/ttds-project/contents.txt",
                         "recepie_project_epicurious/ttds-project/contents.txt",
-                        "recipe_myrecipes.com_project/ttds-project/myrecipes_content.txt"]
+                        "recepie_project_food/ttds-project/contents.txt",
+                        "recipe_myrecipes.com_project/ttds-project/crawled.txt"]
+    # recipeFiles      = ["test_database/content_all_recipes.txt",
+    #                     "test_database/content_bbc.txt",
+    #                     "test_database/content_epicurious.txt",
+    #                     "test_database/content_food.txt",
+    #                     "test_database/content_my_recipes.txt"]
     recipeFileHandle = None
     database         = None
     ps               = None
@@ -108,6 +115,8 @@ class RecipeParser:
                 #print("URL: ", url)
                 self.recipe_id += 1
                 line_num       += 1
+                if self.recipe_id % 100 == 0:
+                    print("Processed %d recipes." % self.recipe_id)               
                 continue
 
             if line_num == 2:
