@@ -229,7 +229,8 @@ class RecipeParser:
                         primary_ing, extra_ing = line.split(" and ", 1)
                         ingredients.extend([primary_ing, extra_ing])
                         ing_num += 1 #count extra ing
-                    except:
+                    except Exception as error:
+                        print(error)
                         print("error in AND: ", line)
 
                 elif "and/or" in line_words:
@@ -237,7 +238,8 @@ class RecipeParser:
                         primary_ing, alt_ing = line.split(" and/or ", 1)
                         ingredients.extend([primary_ing, alt_ing])
                         #not counting alternative ingridient
-                    except:
+                    except Exception as error:
+                        print(error)
                         print("error in AND/OR: ", line)
 
                 elif "plus extra" in line:
@@ -245,7 +247,8 @@ class RecipeParser:
                         primary_ing, extra_same = line.split("plus extra", 1)
                         ingredients.append(primary_ing)
                         #excluding since the same ingridient is used
-                    except:
+                    except Exception as error:
+                        print(error)
                         print("plus extra error line: ", line)
 
                 elif "plus" in line_words:
@@ -253,7 +256,8 @@ class RecipeParser:
                         primary_ing, extra_ing = line.split(" plus ", 1)
                         ingredients.extend([primary_ing, extra_ing])
                         ing_num += 1 #count extra ing
-                    except:
+                    except Exception as error:
+                        print(error)
                         print("plus error line: ", line)
 
                 #dure to the similarity in spelling for and or are special case
@@ -270,7 +274,8 @@ class RecipeParser:
                                 alt_ing, why_needed      = alternative.split("for ", 1)
                                 ingredients.extend([primary_ing, alt_ing])
                                 #not counting alternative ingridient
-                            except:
+                            except Exception as error:
+                                print(error)
                                 print("error in OR and FOR: ", line)
 
                         else:
@@ -278,7 +283,8 @@ class RecipeParser:
                                 primary_ing, why_needed = line.split(" for ", 1)
                                 ingredients.append(primary_ing)
                                 #excluding why ingredient is needed
-                            except:
+                            except Exception as error:
+                                print(error)
                                 print("error in FOR: ", line)
 
                     else:
@@ -286,7 +292,8 @@ class RecipeParser:
                             primary_ing, alt_ing = line.split(" or ", 1)
                             ingredients.extend([primary_ing, alt_ing])
                             #not counting alternative ingridient
-                        except:
+                        except Exception as error:
+                            print(error)
                             print("error in OR: ", line)
 
                 else:
