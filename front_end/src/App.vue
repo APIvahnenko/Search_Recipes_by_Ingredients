@@ -1,218 +1,405 @@
 <template>
   <div id="app">
-    <div class="home">
-      <div class="page-area">
-        <el-input placeholder="请输入内容" v-model="inputValue" class="search">
+    <div class="home col">
+      <section class="first col">
+        <el-autocomplete
+          class="search"
+          v-model="inputValue"
+          :fetch-suggestions="querySearch"
+          placeholder="请输入内容"
+          @select="handleSelect"
+        >
+          <!--这里是搜索框的内容-->
+          <!--select这里会显示所选的内容-->
           <el-button slot="append" icon="el-icon-search" @click="handleSearchClick"></el-button>
-        </el-input>
-
+        </el-autocomplete>
         <!-- 下拉折叠区域 -->
         <section class="collapse-area">
-          <el-collapse v-model="activeNames" @change="handleChange" accordion>
-            <el-collapse-item title="pantry" name="1">
-              <el-checkbox-group v-model="checkList">
-                <el-checkbox label="复选框 A"></el-checkbox>
-                <el-checkbox label="复选框 B"></el-checkbox>
-                <el-checkbox label="复选框 C"></el-checkbox>
-                <el-checkbox label="禁用" disabled></el-checkbox>
-                <el-checkbox label="选中且禁用" disabled></el-checkbox>
-              </el-checkbox-group>
-            </el-collapse-item>
-            <el-collapse-item title="grain" name="2">
-              <el-checkbox-group v-model="checkList">
-                <el-checkbox label="复选框 A"></el-checkbox>
-                <el-checkbox label="复选框 B"></el-checkbox>
-                <el-checkbox label="复选框 C"></el-checkbox>
-                <el-checkbox label="禁用" disabled></el-checkbox>
-                <el-checkbox label="选中且禁用" disabled></el-checkbox>
-              </el-checkbox-group>
-            </el-collapse-item>
-            <el-collapse-item title="vegetable & fruit" name="3">
-              <el-checkbox-group v-model="checkList">
-                <el-checkbox label="复选框 A"></el-checkbox>
-                <el-checkbox label="复选框 B"></el-checkbox>
-                <el-checkbox label="复选框 C"></el-checkbox>
-                <el-checkbox label="禁用" disabled></el-checkbox>
-                <el-checkbox label="选中且禁用" disabled></el-checkbox>
-              </el-checkbox-group>
-            </el-collapse-item>
-            <el-collapse-item title="spices" name="4">
-              <el-checkbox-group v-model="checkList">
-                <el-checkbox label="复选框 A"></el-checkbox>
-                <el-checkbox label="复选框 B"></el-checkbox>
-                <el-checkbox label="复选框 C"></el-checkbox>
-                <el-checkbox label="禁用" disabled></el-checkbox>
-                <el-checkbox label="选中且禁用" disabled></el-checkbox>
-              </el-checkbox-group>
+          <div class="triangle">
+            <div class="triangle-item" @click="foldAll" :class="{'rotate':isRotate}"></div>
+          </div>
+          <el-collapse v-model="activeNames" @change="handleChange">
+            <el-collapse-item :name="index" v-for="(item,index) in checkData" :key="index">
+              <p style="margin-left:15px;" slot="title">
+                <el-icon
+                  class="el-icon-arrow-right"
+                  :class="{'rotate':activeNames.includes(index)}"
+                ></el-icon>
+                {{item.title}}
+              </p>
+              <el-row>
+                <el-col :span="8" v-for="(sub,key) in item.check" :key="key">
+                  <el-checkbox :label="sub" @change="handleAddCheck(sub)"></el-checkbox>
+                </el-col>
+              </el-row>
             </el-collapse-item>
           </el-collapse>
         </section>
-
-        <!-- 图片展示区域 -->
-        <section class="img-area">
-          <transition name="el-fade-in-linear">
-            <div class="img-contaienr" v-show="imgs.length">
-              <div class="img-item" v-for="item in imgs" :key="item.id" @mouseover="() => handleImageHover(item)" @mouseout="() => handleImageOut(item)">
-                <el-image :src="item.src">
-                  <div slot="placeholder" class="image-slot">
-                    <!-- loading<span class="dot">...</span> -->
-                  </div>
-                </el-image>
-                <div class="img-hover-info" v-show="item.isHover">{{ item.desc }}</div>
-              </div>
+      </section>
+      <!-- 图片展示区域 -->
+      <section class="second col">
+        <transition name="el-fade-in-linear">
+          <div class="img-contaienr row" v-show="imgs.length">
+            <div
+              class="img-item"
+              v-for="item in imgs"
+              :key="item.id"
+              @mouseover="() => handleImageHover(item)"
+              @mouseout="() => handleImageOut(item)"
+            >
+              <el-image :src="item.src">
+                <div slot="placeholder" class="image-slot">
+                  <!-- loading<span class="dot">...</span> -->
+                </div>
+              </el-image>
+              <div class="img-hover-info" v-show="item.isHover">{{ item.desc }}</div>
             </div>
-          </transition>
-        </section>
-        <el-button class="footer-btn" icon="el-icon-arrow-down" circle @click="refreshClick"></el-button>
-      </div>
+          </div>
+        </transition>
+        <el-button class="footer-btn" icon="el-icon-refresh-right" circle @click="refreshClick"></el-button>
+        <back-to-top></back-to-top>
+      </section>
     </div>
+
   </div>
 </template>
 
 <script>
-  // @ is an alias to /src
-  import axios from 'axios'
-  export default {
-    name: 'home',
-    components: {
-    },
-    data() {
-      return {
-        imgs: [],
-        inputValue: '',
-        activeNames: ['1'],
-        checkList: ['选中且禁用','复选框 A']
+import DataList from "./assets/dataList.js";
+import BackToTop from './components/backToTop'
+const testData1 = [
+  {
+    id: 1,
+    src:
+      "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+    desc: "图片描述"
+  },
+  {
+    id: 2,
+    src:
+      "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+    desc: "图片描述"
+  },
+  {
+    id: 3,
+    src:
+      "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+    desc: "图片描述"
+  },
+  {
+    id: 4,
+    src:
+      "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+    desc: "图片描述"
+  },
+  {
+    id: 5,
+    src:
+      "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+    desc: "图片描述"
+  },
+  {
+    id: 6,
+    src:
+      "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+    desc: "图片描述"
+  },
+  {
+    id: 7,
+    src:
+      "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+    desc: "图片描述"
+  },
+  {
+    id: 8,
+    src:
+      "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+    desc: "图片描述"
+  },
+  {
+    id: 9,
+    src:
+      "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+    desc: "图片描述"
+  }
+];
+const testData2 = [
+  {
+    id: 1,
+    src:
+      "https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg",
+    desc: "图片描述2"
+  },
+  {
+    id: 2,
+    src:
+      "https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg",
+    desc: "图片描述2"
+  },
+  {
+    id: 3,
+    src:
+      "https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg",
+    desc: "图片描述2"
+  },
+  {
+    id: 4,
+    src:
+      "https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg",
+    desc: "图片描述2"
+  },
+  {
+    id: 5,
+    src:
+      "https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg",
+    desc: "图片描述2"
+  },
+  {
+    id: 6,
+    src:
+      "https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg",
+    desc: "图片描述2"
+  },
+  {
+    id: 7,
+    src:
+      "https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg",
+    desc: "图片描述2"
+  },
+  {
+    id: 8,
+    src:
+      "https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg",
+    desc: "图片描述2"
+  },
+  {
+    id: 9,
+    src:
+      "https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg",
+    desc: "图片描述2"
+  }
+];
+const tempFlag = {
+  search: true,
+  refresh: true
+};
+// @ is an alias to /src
+import axios from "axios";
+export default {
+  name: "home",
+  components: {BackToTop},
+  data() {
+    return {
+      imgs: [],
+      inputValue: "",
+      activeNames: [0],
+      selectCheck: [],
+      checkData: DataList.checkBox,
+      checkList: ["chicken"]
+    };
+  },
+  computed: {
+    isRotate() {
+      // var index = this.activeNames.indexOf("0");
+      if (this.activeNames.length > 0) {
+        return true;
+      } else {
+        return false;
+      }
     }
+  },
+  mounted() {
+    this.getData();
+    this.imgs = testData1;
+  },
+  methods: {
+    //监听页面下滚150px
+    handleScroll(e) {
+      const scrollTop =
+        document.documentElement.scrollTop || document.body.Scroller;
+      this.isScroll = scrollTop > 200;
     },
-    beforeRouteEnter(to, from, next) {
-      // 添加背景色 margin:0;padding:0是为了解决vue四周有白边的问题
-      document.querySelector('body').setAttribute('style', "margin:0;padding:0")
-      next()
+    handleAddCheck(value) {
+      var index = this.selectCheck.indexOf(value);
+      if (index >= 0) {
+        this.selectCheck.splice(index, 1);
+      } else {
+        this.selectCheck.push(value);
+      }
     },
-    beforeRouteLeave(to, from, next) {
-      // 去除背景色
-      document.querySelector('body').setAttribute('style', '')
-      next()
-    },
-    mounted() {
-      this.getData()
-      // setTimeout(() => {
-      this.imgs = [
-        {id: 1, src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg', desc: '图片描述' },
-        {id: 2, src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg', desc: '图片描述'  },
-        {id: 3, src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg', desc: '图片描述'  },
-        {id: 4, src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg', desc: '图片描述'  },
-        {id: 5, src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg', desc: '图片描述'  },
-        {id: 6, src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg', desc: '图片描述'  },
-        {id: 7, src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg', desc: '图片描述'  },
-        {id: 8, src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg', desc: '图片描述'  },
-        {id: 9, src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg', desc: '图片描述'  }
-      ]
-      // }, 300);
-    },
-    methods: {
-      getData() {
-        axios.get("http://wthrcdn.etouch.cn/weather_mini", {
+    getData() {
+      axios
+        .get("http://wthrcdn.etouch.cn/weather_mini", {
           // 传递参数
           params: {
-            city: '深圳'
-          },
-        }).then(response => {
+            queryBox: "spicy" /*这里传递进去的querybox和checkbox*/,
+            checkBox: "chicken"
+          }
+        })
+        .then(response => {
           // 请求成功
           let res = response.data;
           console.log(res);
           //这个res就是请求回来的数据，可以在控制台看到，下面是修改了一条图片描述
-          this.imgs[0].desc = res.data.ganmao
-        })
-      },
-      handleSearchClick() {
-        // location.reload()
-        const arr = [
-          {id: 1, src: 'https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg', desc: '图片描述2' },
-          {id: 2, src: 'https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg', desc: '图片描述2'  },
-          {id: 3, src: 'https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg', desc: '图片描述2'  },
-          {id: 4, src: 'https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg', desc: '图片描述2'  },
-          {id: 5, src: 'https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg', desc: '图片描述2'  },
-          {id: 6, src: 'https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg', desc: '图片描述2'  },
-          {id: 7, src: 'https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg', desc: '图片描述2'  },
-          {id: 8, src: 'https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg', desc: '图片描述2'  },
-          {id: 9, src: 'https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg', desc: '图片描述2'  }
-        ]
-        this.imgs = arr
-      },
-      refreshClick() {
-        const arr = this.imgs.concat(this.imgs)
-        this.imgs = arr
-      },
-      handleImageHover(item) {
-        this.$set(item,'isHover',true)
-      },
-      handleImageOut(item) {
-        this.$set(item,'isHover',false)
-      }
+          this.imgs[0].desc = res.data.ganmao;
+          this.imgs[0].src = res.data.ganmao;
+        });
+    },
+    handleSearchClick() {
+      tempFlag.refresh = !tempFlag.refresh;
+      this.imgs = tempFlag.refresh ? testData1 : testData2;
+    },
+    refreshClick() {
+      tempFlag.search = !tempFlag.search;
+      const arr = this.imgs.concat(tempFlag.search ? testData1 : testData2);
+      this.imgs = arr;
+    },
+    handleImageHover(item) {
+      this.$set(item, "isHover", true);
+    },
+    handleImageOut(item) {
+      this.$set(item, "isHover", false);
+    },
+    querySearch(queryString, cb) {
+      var checkList = this.checkList.map(item => ({ value: item }));
+      var results = queryString
+        ? checkList.filter(this.createFilter(queryString))
+        : checkList;
+      cb(results);
+    },
+    createFilter(queryString) {
+      return checkList => {
+        return (
+          checkList.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0
+        );
+      };
+    },
+    handleSelect(item) {
+      console.log(item);
+    },
+    handleChange() {},
+    foldAll() {
+      this.activeNames = [0];
     }
   }
+};
 </script>
 
 <style lang="less" scoped>
-
-  #app {
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    color: #2c3e50;
+html {
+  padding: 0px;
+  margin: 0px;
+} /*这是把白边去掉的方法*/
+html,#app::-webkit-scrollbar{
+  display: none;
+}
+#app {
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #FFFFFF;
+}
+.isScroll {
+  background: linear-gradient(
+    to right,
+    rgba(255, 0, 0, 0.2) 0%,
+    rgba(255, 0, 0, 0.2) 44%,
+    rgba(255, 0, 0, 0.2) 94%
+  ) !important; /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cc1e5799', endColorstr='#cc2989d8',GradientType=1 );
+}
+.col{
+display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.row{
+   display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  align-items: center; 
+}
+.home {
+  //背景
+  .first {
+    box-sizing: border-box;
+    min-height: 100vh;
+    padding: 250px 350px  250px 350px;
+    width: 100%;
+    background: url("https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg");
+    background-repeat: round;
+    background-attachment: fixed;
+    .search {
+      width: 500px;
+      margin-top: 30px;
+    }
+    .collapse-area {
+      margin-top: 70px;
+      width:1250px;
+      opacity: 0.5;
+    }
   }
 
-  .home {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    //背景
-   /* background: url('https://images.unsplash.com/photo-1546548970-71785318a17b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=600&q=60');*/
-    background: black;
-    background-attachment:fixed;
-    background-repeat: no-repeat;
-
-    .page-area {
-      width: 1280px;
-      .search {
-        width: 500px;
-        margin-top: 30px;
-      }
-      .collapse-area {
-        margin-top: 70px;
-      }
-      .img-area {
-        min-height: 700px;
-        .img-contaienr {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          flex-wrap: wrap;
-          margin-top: 80px;
-          .img-item {
-            width: 380px;
-            margin: 0px 2px;
-            position: relative;
-            .img-hover-info {
-              width: 380px;
-              height: 253px;
-              position: absolute;
-              top: 0px;
-              left: 0px;
-              background: rgba(0, 0, 0, .5);
-              text-align: center;
-              line-height: 253px;
-              color: #FFF;
-            }
-          }
+  .second {
+      min-height:100vh;
+      width: 100%;
+      
+      background: black/*linear-gradient(
+    to right,
+    rgba(255, 0, 0, 0.2) 0%,
+    rgba(255, 0, 0, 0.2) 44%,
+    rgba(255, 0, 0, 0.2) 94%
+  )*/ !important; /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cc1e5799', endColorstr='#cc2989d8',GradientType=1 );
+    .img-contaienr {
+    width: 1250px;
+      flex-wrap: wrap;
+      margin-top: 80px;
+      .img-item {
+        width: 380px;
+        margin: 0px 2px;
+        position: relative;
+        .img-hover-info {
+          width: 380px;
+          height: 253px;
+          position: absolute;
+          top: 0px;
+          left: 0px;
+          background: rgba(255, 165, 79, 0.5);
+          text-align: center;
+          line-height: 253px;
+          color: #fff;
         }
       }
     }
-    .footer-btn {
-      margin-top: 30px;
-    }
   }
+  .footer-btn {
+    margin-top: 30px;
+  }
+}
+.triangle {
+  width: 100%;
+  height: 30px;
+  line-height: 30px;
+  font-size: 30px;
+  text-align: left;
+  .triangle-item {
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    border-left: 10px solid #000;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    transition: transform 0.2s ease-in;
+  }
+}
+/deep/.el-collapse-item__arrow {
+  display: none !important;
+}
+.rotate {
+  transform: rotate(90deg);
+  transition: transform 0.2s ease-in;
+}
 </style>
