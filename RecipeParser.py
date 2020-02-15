@@ -231,7 +231,7 @@ class RecipeParser:
                         ing_num += 1 #count extra ing
                     except Exception as error:
                         print(error)
-                        print("error in AND: ", line)
+                        print("1: Error in AND: ", line)
 
                 elif "and/or" in line_words:
                     try:
@@ -240,7 +240,7 @@ class RecipeParser:
                         #not counting alternative ingridient
                     except Exception as error:
                         print(error)
-                        print("error in AND/OR: ", line)
+                        print("2: Error in AND/OR: ", line)
 
                 elif "plus extra" in line:
                     try:
@@ -249,7 +249,7 @@ class RecipeParser:
                         #excluding since the same ingridient is used
                     except Exception as error:
                         print(error)
-                        print("plus extra error line: ", line)
+                        print("3: Error in PLUS EXTRA: ", line)
 
                 elif "plus" in line_words:
                     try:
@@ -258,7 +258,7 @@ class RecipeParser:
                         ing_num += 1 #count extra ing
                     except Exception as error:
                         print(error)
-                        print("plus error line: ", line)
+                        print("4: Error in PLUS: ", line)
 
                 #dure to the similarity in spelling for and or are special case
                 elif "or" in line_words:
@@ -276,7 +276,7 @@ class RecipeParser:
                                 #not counting alternative ingridient
                             except Exception as error:
                                 print(error)
-                                print("error in OR and FOR: ", line)
+                                print("5: Error in OR and FOR: ", line)
 
                         else:
                             try:
@@ -285,7 +285,7 @@ class RecipeParser:
                                 #excluding why ingredient is needed
                             except Exception as error:
                                 print(error)
-                                print("error in FOR: ", line)
+                                print("6: Error in FOR: ", line)
 
                     else:
                         try:
@@ -294,7 +294,7 @@ class RecipeParser:
                             #not counting alternative ingridient
                         except Exception as error:
                             print(error)
-                            print("error in OR: ", line)
+                            print("7: Error in OR: ", line)
 
                 else:
                     ingredients.append(line)
