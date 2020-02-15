@@ -182,22 +182,25 @@ class RecipeParser:
 
                 #key words search
                 if "and" in line_words:
-                    primary_ing, extra_ing = line.split(" and", 1)
+                    primary_ing, extra_ing = line.split(" and ", 1)
                     ingredients.extend([primary_ing, extra_ing])
                     ing_num += 1 #count extra ing
 
                 elif "and/or" in line_words:
-                    primary_ing, alt_ing = line.split(" and/or", 1)
+                    primary_ing, alt_ing = line.split(" and/or ", 1)
                     ingredients.extend([primary_ing, alt_ing])
                     #not counting alternative ingridient
 
                 elif "plus extra" in line:
-                    primary_ing, extra_same = line.split(" plus extra", 1)
-                    ingredients.append(primary_ing)
-                    #excluding since the same ingridient is used
+                    try:
+                        primary_ing, extra_same = line.split("plus extra", 1)
+                        ingredients.append(primary_ing)
+                        #excluding since the same ingridient is used
+                    except:
+                        print("plus extra error line: ", line)
 
                 elif "plus" in line_words:
-                    primary_ing, extra_ing = line.split(" plus", 1)
+                    primary_ing, extra_ing = line.split(" plus ", 1)
                     ingredients.extend([primary_ing, extra_ing])
                     ing_num += 1 #count extra ing
 
@@ -207,11 +210,12 @@ class RecipeParser:
                     #looking at the possitions of word in line
                     if "for" in line_words:
                         pos_for = line.find(" for ")
-                        pos_or  = line.find(" or ", 1)
+                        pos_or  = line.find(" or ")
 
                         if pos_for > pos_or:
+
                             primary_ing, alternative = line.split(" or ", 1)
-                            alt_ing, why_needed      = alternative.split(" for ", 1)
+                            alt_ing, why_needed      = alternative.split("for ", 1)
                             ingredients.extend([primary_ing, alt_ing])
                             #not counting alternative ingridient
 
