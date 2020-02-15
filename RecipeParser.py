@@ -18,15 +18,23 @@ class RecipeParser:
     recipeFileHandle = None
     database         = None
     ps               = None
+    stop_words       = None
+    recipe_classes   = None
     recipe_id        = 0
 
     def __init__(self):
-        self.database = Database("recipes")
-        self.ps       = PorterStemmer()
+        self.database       = Database("recipes")
+        self.ps             = PorterStemmer()
+        self.stop_words     = self.GetStopWords()
+        self.recipe_classes = self.GetRecipeClasses()
 
+    def GetStopWords(self):
+        return [stop_words.rstrip('\n') for stop_words in open("recipe_stopwords.txt", 'r', encoding = "utf8")]
+
+    def GetRecipeClasses(self):
+        return [recipe_classes.rstrip('\n') for recipe_classes in open("classes.txt", 'r', encoding = "utf-8")]
+        
     def cleaning_ing_list(self, ingredients):
-        #getting a list of stop phrases
-        stop_words = [stop_words.rstrip('\n') for stop_words in open("recipe_stopwords.txt", 'r', encoding = "utf-8")]
         list_of_ing = []
 
         for ing in ingredients:
@@ -43,7 +51,7 @@ class RecipeParser:
             ing_words = pattern.findall(ing)
 
             #removing stopwords
-            filtered_ing = [w for w in ing_words if w not in stop_words]
+            filtered_ing = [w for w in ing_words if w not in self.stop_words]
 
             #stemming
             clean_ing = []
@@ -63,18 +71,14 @@ class RecipeParser:
         return final_list
 
     def recipe_class(self, title, discription_text):
-
         #discription words
-        discript = title + " " + discription_text
+        discript    = title + " " + discription_text
         discription = re.sub(r'[^\w\s]',' ',discript).lower() #removes punctuation, lower case
-
-        #specified class labels
-        classes = [stop_words.rstrip('\n') for stop_words in open("classes.txt", 'r', encoding = "utf-8")]
 
         labels = []
 
         #if the discription contains a specified class
-        for label in classes:
+        for label in self.recipe_classes:
             if label in discription:
 
                 #if middle eastern (do not classify as easter)
@@ -221,14 +225,20 @@ class RecipeParser:
 
                 #key words search
                 if "and" in line_words:
-                    primary_ing, extra_ing = line.split(" and ", 1)
-                    ingredients.extend([primary_ing, extra_ing])
-                    ing_num += 1 #count extra ing
+                    try:
+                        primary_ing, extra_ing = line.split(" and ", 1)
+                        ingredients.extend([primary_ing, extra_ing])
+                        ing_num += 1 #count extra ing
+                    except:
+                        print("error in AND: ", line)
 
                 elif "and/or" in line_words:
-                    primary_ing, alt_ing = line.split(" and/or ", 1)
-                    ingredients.extend([primary_ing, alt_ing])
-                    #not counting alternative ingridient
+                    try:
+                        primary_ing, alt_ing = line.split(" and/or ", 1)
+                        ingredients.extend([primary_ing, alt_ing])
+                        #not counting alternative ingridient
+                    except:
+                        print("error in AND/OR: ", line)
 
                 elif "plus extra" in line:
                     try:
@@ -244,7 +254,7 @@ class RecipeParser:
                         ingredients.extend([primary_ing, extra_ing])
                         ing_num += 1 #count extra ing
                     except:
-                        print("plus extra error line: ", line)
+                        print("plus error line: ", line)
 
                 #dure to the similarity in spelling for and or are special case
                 elif "or" in line_words:
@@ -255,16 +265,21 @@ class RecipeParser:
                         pos_or  = line.find(" or ")
 
                         if pos_for > pos_or:
-
-                            primary_ing, alternative = line.split(" or ", 1)
-                            alt_ing, why_needed      = alternative.split("for ", 1)
-                            ingredients.extend([primary_ing, alt_ing])
-                            #not counting alternative ingridient
+                            try:
+                                primary_ing, alternative = line.split(" or ", 1)
+                                alt_ing, why_needed      = alternative.split("for ", 1)
+                                ingredients.extend([primary_ing, alt_ing])
+                                #not counting alternative ingridient
+                            except:
+                                print("error in OR and FOR: ", line)
 
                         else:
-                            primary_ing, why_needed = line.split(" for ", 1)
-                            ingredients.append(primary_ing)
-                            #excluding why ingredient is needed
+                            try:
+                                primary_ing, why_needed = line.split(" for ", 1)
+                                ingredients.append(primary_ing)
+                                #excluding why ingredient is needed
+                            except:
+                                print("error in FOR: ", line)
 
                     else:
                         try:
