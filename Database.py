@@ -15,21 +15,23 @@ class Database:
     
     def __del__(self):
         self.database.close()
-        
+    
     def CreateIngredientIndexTable(self):
         self.cursor.execute("DROP TABLE IF EXISTS ingredient_index")
         self.cursor.execute("""CREATE TABLE ingredient_index (
-                               ingredient VARCHAR(255),
-                               recipe_ids BLOB)""")
+                               ingredient             VARCHAR(255),
+                               recipe_ids             BLOB,
+                               ingredient_synonyms    VARCHAR(255),
+                               ingredient_temperature VARCHAR(255))""")
     
     def CreateRecipeInfoTable(self):
         self.cursor.execute("DROP TABLE IF EXISTS recipe_info")
         self.cursor.execute("""CREATE TABLE recipe_info (
                                recipe_id        MEDIUMINT UNSIGNED,    
-                               recipe_url       VARCHAR(255),    
-                               image_url        VARCHAR(255),    
-                               title            VARCHAR(255),    
-                               description      VARCHAR(1000),    
+                               recipe_url       VARCHAR(1000),    
+                               image_url        VARCHAR(1000),    
+                               title            VARCHAR(1000),    
+                               description      VARCHAR(10000),    
                                preparation_time SMALLINT UNSIGNED,            
                                cook_time        SMALLINT UNSIGNED,            
                                serving_count    SMALLINT UNSIGNED,
@@ -58,6 +60,17 @@ class Database:
                                  WHERE ingredient = %s", (encode(recipeIds), ingredient))
         
         self.database.commit()
+    
+    
+    
+    #def AddIngredientSynonymsToIngredientIndexTable(self, ingredient, ingredientSynonyms):
+    #def GetIngredientSynonyms(self, ingredient):
+    #def GetExtendedRecipeIds(self, ingredients):
+    #def AddIngredientTemperatureToIngredientIndexTable(self, ingredient, ingredientTemperature):
+    #def GetIngredientTemperature(self, ingredientTemperature): 
+    
+    
+    
     
     def AddToRecipeInfoTable(self, recipeId, recipeUrl, imageUrl, title, description,
                              preparationTime, cookTime, servingCount, ingredientCount):
