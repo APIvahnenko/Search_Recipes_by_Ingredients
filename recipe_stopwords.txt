@@ -95,6 +95,7 @@ sprig
 strips
 tablespoon
 tablespoons
+teaspoon
 tbps
 tbsp
 thick
@@ -106,8 +107,13 @@ tins
 tiny
 topped
 tsp
+tbsp
 whole
+-sided
+all-butter
+and/or
 thirds
+bottles
 squeeze
 square
 unwrap
@@ -186,6 +192,11 @@ shavings
 paint
 sixpences
 dessertspoon
+shades
+extractor
+all-in-one
+accompaniment
+unfiltered
 carton
 skins
 tip
@@ -233,6 +244,7 @@ tbs
 tablespons
 abondance
 tspspoon
+teaspoons
 sprinkling
 matchbox-size
 branches
@@ -347,6 +359,7 @@ sliced
 slices
 soaked
 soft
+flat-cut
 softened
 squeezed
 strong
@@ -976,6 +989,8 @@ smashed
 specialty
 ideally
 chewy
+normal
+de-boned
 thinned
 winkles
 health
@@ -1157,6 +1172,7 @@ gift
 tags
 autumn
 solids
+salted
 alternativelycress
 store
 stores
@@ -1168,8 +1184,7 @@ ball
 section
 viens
 diagonally
-### Colours
-black
+### Colourss
 brown
 dark
 grey
@@ -1202,6 +1217,8 @@ silver
 golden
 ruby
 browning
+medium-dark
+red-and-white-striped
 ### English Srtandard SW(members.unine.ch/jacques.savoy/clef/englishST.txt)
 a
 a's
@@ -1753,10 +1770,15 @@ zo
 -inch-diameter
 -percent-lean
 -day
+-ounce
+-pound
+-inch-wide
+-inch-thick
+-thick
 bought
 stewing
 stewed
-warm 
+warm
 sterilised
 diluted
 section

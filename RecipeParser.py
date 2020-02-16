@@ -33,7 +33,7 @@ class RecipeParser:
 
     def GetRecipeClasses(self):
         return [recipe_classes.rstrip('\n') for recipe_classes in open("classes.txt", 'r', encoding = "utf-8")]
-        
+
     def cleaning_ing_list(self, ingredients):
         list_of_ing = []
 
@@ -51,13 +51,17 @@ class RecipeParser:
             ing_words = pattern.findall(ing)
 
             #removing stopwords
-            filtered_ing = [w for w in ing_words if w not in self.stop_words]
+            # filtered_ing = [w for w in ing_words if w not in self.stop_words]
+            filtered_ing = []
+            for w in ing_words:
+                if w not in self.stop_words:
+                    filtered_ing.append(w)
 
             #stemming
             clean_ing = []
             for word in filtered_ing:
                 clean_ing.append(word)
-                # clean_ing.append(self.ps.stem(word))
+                # clean_ing.append(self.ps.stem(word)) ####dissabled stemming
 
             #lower caseing & appending
             if len(clean_ing) > 0:
@@ -91,10 +95,12 @@ class RecipeParser:
         return labels
 
     def clean_time(self, string, url):
+        d_match  = re.findall(r"([0-9]+\s?[d]+)", string, re.I)
         h_match  = re.findall(r"([0-9]+\s?[h]+)", string, re.I)
         m_match  = re.findall(r"([0-9]+\s?[m]+)", string, re.I)
         to_match = re.findall(r"([0-9]+\s[t][o]\s+[0-9])", string, re.I) #eg. "1 to 2 hours"
 
+        days    = 0
         hours   = 0
         minutes = 0
 
@@ -105,6 +111,10 @@ class RecipeParser:
             else:
                 string = string.split("to")[0]
 
+        #if contains days
+        if d_match:
+            days = int(re.findall(r'\d+', str(d_match))[0])
+
         #if contains hours
         if h_match:
             hours = int(re.findall(r'\d+', str(h_match))[0])
@@ -114,7 +124,7 @@ class RecipeParser:
             minutes = int(re.findall(r'\d+', str(m_match))[0])
 
         #if does not contains min or hours
-        if not h_match and not m_match:
+        if not d_match and not h_match and not m_match:
 
             if "overnight" in string:
                 hours = 8
@@ -129,7 +139,7 @@ class RecipeParser:
                 print(url)
                 print("time input error: ", string)
 
-        return hours*60 + minutes
+        return days*1440 + hours*60 + minutes
 
     def ParseRecipeFile(self):
         line_num    = 1
@@ -144,7 +154,7 @@ class RecipeParser:
                 self.recipe_id += 1
                 line_num       += 1
                 if self.recipe_id % 100 == 0:
-                    print("Processed %d recipes." % self.recipe_id)               
+                    print("Processed %d recipes." % self.recipe_id)
                 continue
 
             if line_num == 2:
@@ -192,12 +202,17 @@ class RecipeParser:
                 continue
 
             if "*****eol*****" in line:
+
+                # print(str(ingredients).encode("utf-8"))
+
                 clean_ingredients = self.cleaning_ing_list(ingredients) #clean list of ingredients
                 labels = self.recipe_class(title, description) #label based on title and discription
 
                 #label exists add the class as an ingredient
                 if labels:
                     clean_ingredients = clean_ingredients + labels
+
+                # print(str(clean_ingredients).encode("utf-8"))
 
                 #print("ingredients: ", clean_ingredients)
                 #print("\nnum of ingredients: ", ing_num)
@@ -223,14 +238,23 @@ class RecipeParser:
                 #words of an ingridient entry
                 line_words = line.split()
 
+
+                if "," in line:
+                    pos_comma = line.find(",")
+
                 #key words search
                 if "and" in line_words:
+
+                    # pos_and = line.find("and")
+                    # if pos_comma > pos_and
+
                     try:
                         primary_ing, extra_ing = line.split(" and ", 1)
                         ingredients.extend([primary_ing, extra_ing])
                         ing_num += 1 #count extra ing
+
                     except:
-                        print("error in AND: ", line)
+                        print("error in AND: ", line.encode("utf-8"))
 
                 elif "and/or" in line_words:
                     try:
@@ -238,7 +262,7 @@ class RecipeParser:
                         ingredients.extend([primary_ing, alt_ing])
                         #not counting alternative ingridient
                     except:
-                        print("error in AND/OR: ", line)
+                        print("error in AND/OR: ", line.encode("utf-8"))
 
                 elif "plus extra" in line:
                     try:
@@ -246,7 +270,7 @@ class RecipeParser:
                         ingredients.append(primary_ing)
                         #excluding since the same ingridient is used
                     except:
-                        print("plus extra error line: ", line)
+                        print("plus extra error line: ", line.encode("utf-8"))
 
                 elif "plus" in line_words:
                     try:
@@ -254,7 +278,7 @@ class RecipeParser:
                         ingredients.extend([primary_ing, extra_ing])
                         ing_num += 1 #count extra ing
                     except:
-                        print("plus error line: ", line)
+                        print("plus error line: ", line.encode("utf-8"))
 
                 #dure to the similarity in spelling for and or are special case
                 elif "or" in line_words:
@@ -271,7 +295,7 @@ class RecipeParser:
                                 ingredients.extend([primary_ing, alt_ing])
                                 #not counting alternative ingridient
                             except:
-                                print("error in OR and FOR: ", line)
+                                print("error in OR and FOR: ", line.encode("utf-8"))
 
                         else:
                             try:
@@ -279,7 +303,7 @@ class RecipeParser:
                                 ingredients.append(primary_ing)
                                 #excluding why ingredient is needed
                             except:
-                                print("error in FOR: ", line)
+                                print("error in FOR: ", line.encode("utf-8"))
 
                     else:
                         try:
@@ -287,7 +311,7 @@ class RecipeParser:
                             ingredients.extend([primary_ing, alt_ing])
                             #not counting alternative ingridient
                         except:
-                            print("error in OR: ", line)
+                            print("error in OR: ", line.encode("utf-8"))
 
                 else:
                     ingredients.append(line)
@@ -297,7 +321,7 @@ class RecipeParser:
                 continue
 
             else:
-                print("error")
+                print("error", line.text.encode("utf-8"))
 
     def ParseRecipeFiles(self):
         for recipeFile in self.recipeFiles:
