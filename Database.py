@@ -40,9 +40,9 @@ class Database:
                                image_url        VARCHAR(1000),    
                                title            VARCHAR(1000),    
                                description      VARCHAR(10000),    
-                               preparation_time SMALLINT UNSIGNED,            
-                               cook_time        SMALLINT UNSIGNED,            
-                               serving_count    SMALLINT UNSIGNED,
+                               preparation_time MEDIUMINT UNSIGNED,            
+                               cook_time        MEDIUMINT UNSIGNED,            
+                               serving_count    MEDIUMINT UNSIGNED,
                                ingredient_count TINYINT UNSIGNED)""")
     
     def AddToIngredientIndexTable(self, ingredient, recipeId):
