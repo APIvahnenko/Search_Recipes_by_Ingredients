@@ -54,7 +54,7 @@ class RecipeParser:
             # filtered_ing = [w for w in ing_words if w not in self.stop_words]
             filtered_ing = []
             for w in ing_words:
-                if w not in self.stop_words:
+                if w.lower() not in self.stop_words:
                     filtered_ing.append(w)
 
             #stemming
