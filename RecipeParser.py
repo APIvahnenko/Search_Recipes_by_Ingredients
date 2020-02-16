@@ -252,33 +252,57 @@ class RecipeParser:
                         primary_ing, extra_ing = line.split(" and ", 1)
                         ingredients.extend([primary_ing, extra_ing])
                         ing_num += 1 #count extra ing
+<<<<<<< HEAD
 
                     except:
                         print("error in AND: ", line.encode("utf-8"))
+=======
+                    except Exception as error:
+                        print(error)
+                        print("1: Error in AND: ", line)
+>>>>>>> 227d0b5b2e66381758cae4278c82fce7231d3c0b
 
                 elif "and/or" in line_words:
                     try:
                         primary_ing, alt_ing = line.split(" and/or ", 1)
                         ingredients.extend([primary_ing, alt_ing])
                         #not counting alternative ingridient
+<<<<<<< HEAD
                     except:
                         print("error in AND/OR: ", line.encode("utf-8"))
+=======
+                    except Exception as error:
+                        print(error)
+                        print("2: Error in AND/OR: ", line)
+>>>>>>> 227d0b5b2e66381758cae4278c82fce7231d3c0b
 
                 elif "plus extra" in line:
                     try:
                         primary_ing, extra_same = line.split("plus extra", 1)
                         ingredients.append(primary_ing)
                         #excluding since the same ingridient is used
+<<<<<<< HEAD
                     except:
                         print("plus extra error line: ", line.encode("utf-8"))
+=======
+                    except Exception as error:
+                        print(error)
+                        print("3: Error in PLUS EXTRA: ", line)
+>>>>>>> 227d0b5b2e66381758cae4278c82fce7231d3c0b
 
                 elif "plus" in line_words:
                     try:
                         primary_ing, extra_ing = line.split(" plus ", 1)
                         ingredients.extend([primary_ing, extra_ing])
                         ing_num += 1 #count extra ing
+<<<<<<< HEAD
                     except:
                         print("plus error line: ", line.encode("utf-8"))
+=======
+                    except Exception as error:
+                        print(error)
+                        print("4: Error in PLUS: ", line)
+>>>>>>> 227d0b5b2e66381758cae4278c82fce7231d3c0b
 
                 #dure to the similarity in spelling for and or are special case
                 elif "or" in line_words:
@@ -294,24 +318,42 @@ class RecipeParser:
                                 alt_ing, why_needed      = alternative.split("for ", 1)
                                 ingredients.extend([primary_ing, alt_ing])
                                 #not counting alternative ingridient
+<<<<<<< HEAD
                             except:
                                 print("error in OR and FOR: ", line.encode("utf-8"))
+=======
+                            except Exception as error:
+                                print(error)
+                                print("5: Error in OR and FOR: ", line)
+>>>>>>> 227d0b5b2e66381758cae4278c82fce7231d3c0b
 
                         else:
                             try:
                                 primary_ing, why_needed = line.split(" for ", 1)
                                 ingredients.append(primary_ing)
                                 #excluding why ingredient is needed
+<<<<<<< HEAD
                             except:
                                 print("error in FOR: ", line.encode("utf-8"))
+=======
+                            except Exception as error:
+                                print(error)
+                                print("6: Error in FOR: ", line)
+>>>>>>> 227d0b5b2e66381758cae4278c82fce7231d3c0b
 
                     else:
                         try:
                             primary_ing, alt_ing = line.split(" or ", 1)
                             ingredients.extend([primary_ing, alt_ing])
                             #not counting alternative ingridient
+<<<<<<< HEAD
                         except:
                             print("error in OR: ", line.encode("utf-8"))
+=======
+                        except Exception as error:
+                            print(error)
+                            print("7: Error in OR: ", line)
+>>>>>>> 227d0b5b2e66381758cae4278c82fce7231d3c0b
 
                 else:
                     ingredients.append(line)
