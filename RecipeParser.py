@@ -104,6 +104,10 @@ class RecipeParser:
         hours   = 0
         minutes = 0
 
+        #if contains a dash
+        if "-" in string:
+            string = string.split('-', 1)[0]
+
         #key phrase search
         if "to" in string:
             if to_match:
@@ -132,12 +136,18 @@ class RecipeParser:
             elif "no cooking required" in string.lower():
                 hours = 0
 
+            elif string.isdigit():
+                minutes = int(string)
+
+            elif "0S" in string.lower():
+                hours = 10 ### Error in parsing recipe given large prep time
+
             elif "none" in string.lower():
                 hours = 0
 
             else:
-                print(url)
-                print("time input error: ", string)
+                print("1. TIME INPUT ERROR: ", string, " URL: ", url)
+                return "skip this recipe"
 
         return days*1440 + hours*60 + minutes
 
@@ -203,8 +213,11 @@ class RecipeParser:
 
             if "*****eol*****" in line:
 
-                # print(str(ingredients).encode("utf-8"))
+                #if the recipe has parsing issues
+                if cook_time =="skip this recipe" or prep_time =="skip this recipe":
+                    continue
 
+                # print(str(ingredients).encode("utf-8"))
                 clean_ingredients = self.cleaning_ing_list(ingredients) #clean list of ingredients
                 labels = self.recipe_class(title, description) #label based on title and discription
 
@@ -248,7 +261,7 @@ class RecipeParser:
 
                     except:
                         ingredients.append(line)
-                        print("error in AND: ", line.encode("utf-8"))
+                        print("1. ERROR in AND: ", line.encode("utf-8"))
 
                 elif "and/or" in line_words:
                     try:
