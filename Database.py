@@ -24,6 +24,14 @@ class Database:
                                ingredient_synonyms    VARCHAR(255),
                                ingredient_temperature VARCHAR(255))""")
     
+    # def CreateIngredientIndexTable(self):
+    #     self.cursor.execute("DROP TABLE IF EXISTS ingredient_index")
+    #     self.cursor.execute("""CREATE TABLE ingredient_index (
+    #                            ingredient             VARCHAR(255),
+    #                            recipe_ids             VARCHAR(10000),
+    #                            ingredient_synonyms    VARCHAR(255),
+    #                            ingredient_temperature VARCHAR(255))""")
+    
     def CreateRecipeInfoTable(self):
         self.cursor.execute("DROP TABLE IF EXISTS recipe_info")
         self.cursor.execute("""CREATE TABLE recipe_info (
@@ -61,6 +69,32 @@ class Database:
         
         self.database.commit()
     
+    # def AddToIngredientIndexTable(self, ingredient, recipeId):    
+    #     self.cursor.execute("SELECT count(*)      \
+    #                          FROM ingredient_index\
+    #                          WHERE ingredient = %s", ingredient)
+    # 
+    #     if self.cursor.fetchone()[0] == 0:    # If it is a new ingredient.    
+    #         recipeIdsString = ','.join(recipeIds)
+    #         self.cursor.execute("INSERT INTO ingredient_index\
+    #                              (ingredient, recipe_ids)    \
+    #                              VALUES (%s, %s)", (ingredient, str(recipeId)))
+    #     else:
+    #         self.cursor.execute("SELECT recipe_ids    \
+    #                              FROM ingredient_index\
+    #                              WHERE ingredient = %s", ingredient)
+    #         recipeIds = self.cursor.fetchone()[0]
+    #         recipeIds = recipesIds + "," + str(recipeId)
+    #         self.cursor.execute("UPDATE ingredient_index\
+    #                              SET recipe_ids = %s    \
+    #                              WHERE ingredient = %s", (recipeIds, ingredient))
+    # 
+    #     self.database.commit()
+    
+    
+    
+    
+    
     
     
     #def AddIngredientSynonymsToIngredientIndexTable(self, ingredient, ingredientSynonyms):
@@ -86,4 +120,5 @@ class Database:
         self.cursor.execute("SELECT recipe_ids    \
                              FROM ingredient_index\
                              WHERE ingredient = %s", ingredient)
-        return decode(self.cursor.fetchone()[0])    
+        return decode(self.cursor.fetchone()[0])
+        # return self.cursor.fetchone()[0] 
