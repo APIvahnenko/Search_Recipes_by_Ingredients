@@ -55,13 +55,19 @@
                     @mouseover="() => handleImageHover(item)"
                     @mouseout="() => handleImageOut(item)"
             >
-              <el-image :src="item.src">
+              <el-image :src="item.src" fit="fill">
                 <div slot="placeholder" class="image-slot">
                   <!-- loading<span class="dot">...</span> -->
-                  <span v-for="desc in item.desc" :key="desc">{{desc}}</span>
+<!--                  <span v-for="desc in item.desc" :key="desc">{{desc}}</span>-->
+                </div>
+                <div slot="error" class="image-slot">
+                  <i class="el-icon-picture-outline"></i>
                 </div>
               </el-image>
-              <div class="img-hover-info" v-show="item.isHover">{{ item.desc }}</div>
+              <div class="img-hover-info" v-show="item.isHover">
+                {{item.desc}}
+<!--                <span v-for="desc in item.desc" :key="desc">{{desc}}</span>-->
+              </div>
             </div>
           </div>
         </transition>
@@ -297,7 +303,7 @@
               //这个res就是请求回来的数据，可以在控制台看到，下面是修改了一条图片描述
               this.recipe_ids = response.data.id;
 			  this.length_recipe_ids = response.data.length;
-			  this.retrieveData();
+			  await this.retrieveData();
               //this.imgs[0].desc = res.data;
             //})
 			}catch(error){
@@ -307,7 +313,7 @@
       //每次取的时候先写个函数去修改它的key，image1=image+'1'这样
 	
       async handleSearchClick() {
-        this.getData();
+        await this.getData();
 		//this.imgs[0].desc=this.check_imgs[0].desc;
 		//this.retrieveData();
         //tempFlag.refresh = !tempFlag.refresh;
@@ -444,18 +450,48 @@
         margin-top: 80px;
         .img-item {
           width: 380px;
+          height:200px;
           margin: 0px 2px;
           position: relative;
-          .img-hover-info {
+          .image-slot {
             width: 380px;
-            height: 253px;
-            position: absolute;
-            top: 0px;
-            left: 0px;
-            background: rgba(255, 165, 79, 0.5);
-            text-align: center;
+            height: 100px;
+            min-height: 253px;
+            background-color: #fff;
+            font-size: 50px;
             line-height: 253px;
-            color: #fff;
+            color: aqua;
+          }
+          .img-hover-info {
+            width:380px;
+            height:100%;
+            position:absolute;
+            top:0px;
+            left:0px;
+            /*background:rgba(255, 165, 79, 0.5);*/
+            text-align:left;
+            color:#fff;
+            word-wrap:break-word;
+            word-break:normal;
+            display:flex;
+            align-items:left;
+            justify-content:space-around;
+            flex-direction:column;
+            padding:20px;
+            box-sizing:border-box;
+            /*width: 380px;*/
+            /*height: 100%;*/
+            /*position: absolute;*/
+            /*top: 0px;*/
+            /*left: 0px;*/
+            background: rgba(255, 165, 79, 0.5);
+            /*text-align: left;*/
+            /*display: flex;*/
+            /*align-items:center;*/
+            /*!*padding: 5px;*!*/
+            /*color: #fff;*/
+            /*word-break: break-all;*/
+            /*word-wrap: break-word;*/
           }
         }
       }
@@ -504,5 +540,9 @@
   .text-color{
     color: white;
     font-family: "Times New Roman"
+  }
+  .fig{
+    width:100%;
+    height:100%;
   }
 </style>
