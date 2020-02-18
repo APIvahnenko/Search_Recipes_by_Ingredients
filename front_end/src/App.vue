@@ -68,8 +68,9 @@
         <el-button class="footer-btn" icon="el-icon-arrow-down" circle @click="refreshClick"></el-button>
         <back-to-top></back-to-top>
       </section>
-    </div>
+	</div>
   </div>
+  
 </template>
 
 <script>
@@ -80,7 +81,7 @@
       id: 1,
       src:
           "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
-      desc: "图片描述"
+      desc: "hi testdata1"
     },
     {
       id: 2,
@@ -136,7 +137,7 @@
       id: 1,
       src:
           "https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg",
-      desc: "图片描述2"
+      desc: "hi testdata 2"
     },
     {
       id: 2,
@@ -201,6 +202,13 @@
         isShowShadow: false,
         isCollapse: false,
         imgs: [],
+		//added part
+		recipe_ids: [],
+		length_recipe_ids : "",
+		recipe_idslist:[],
+		counter : 0,
+		check_imgs : [],
+		//end added part
         inputValue: "",
         activeNames: [0],
         selectCheck: [],
@@ -216,10 +224,10 @@
         } else {
           return false;
         }
-      }
-    },
+      },
+	},
     mounted() {
-      this.getData();
+      //this.getData();
       this.imgs = testData1;
       window.addEventListener("scroll", this.handleScroll, true);
     },
@@ -241,31 +249,77 @@
           this.selectCheck.push(value);
         }
       },
-      getData() {
-        axios
-            .get("http://wthrcdn.etouch.cn/weather_mini", {
+	  async retrieveData(){
+	  //var recipe_idslist = [];
+	  var local_counter = this.counter+10;
+	  while(this.counter<local_counter){
+			if(this.counter <this.length_recipe_ids){
+		this.recipe_idslist.push(this.recipe_ids[this.counter]);
+		this.counter++;
+		}
+	  }
+	  
+	  this.recipe_idslist = this.recipe_idslist.toString();
+	  try{
+	  const response = await axios.get("http://127.0.0.1:5000/retrieve", {params: {recipe_list:this.recipe_idslist,city:'None'}});
+	  //.then((response) => {
+		//let res = response.data;
+		console.log(response.data);
+		this.check_imgs = response.data.recipe_info;
+	  //})
+	  }catch(error){
+				console.error(error);
+		}
+		
+	  //var imgs_length = this.check_imgs.length;
+	  //var i = 0;
+	  //while(imgs_length < 9){
+		//	this,check_imgs.push(testData1[i]);
+			//i++;
+			//imgs_length++;
+		//}
+		//this.imgs = this.check_imgs;
+		this.recipe_idslist = [];
+	  },
+      async getData() {
+		try{
+         const response = await axios.get("http://127.0.0.1:5000/test", {
               // 传递参数
               params: {
-                city: '深圳'
+                city: 'hi',
+				recipe:'whatsup'
               }
-            })
-            .then(response => {
-              // 请求成功
-              let res = response.data;
-              console.log(res);
-              //这个res就是请求回来的数据，可以在控制台看到，下面是修改了一条图片描述
-              this.imgs[0].desc = res.data;
             });
-      },
+            //.then((response) => {
+              // 请求成功
+              //let res = response.data;
+         console.log(response.data);
+              //这个res就是请求回来的数据，可以在控制台看到，下面是修改了一条图片描述
+              this.recipe_ids = response.data.id;
+			  this.length_recipe_ids = response.data.length;
+			  this.retrieveData();
+              //this.imgs[0].desc = res.data;
+            //})
+			}catch(error){
+				console.error(error);
+			}
+	  },
       //每次取的时候先写个函数去修改它的key，image1=image+'1'这样
-
-      handleSearchClick() {
-        tempFlag.refresh = !tempFlag.refresh;
-        this.imgs = tempFlag.refresh ? testData1 : testData2;
+	
+      async handleSearchClick() {
+        this.getData();
+		//this.imgs[0].desc=this.check_imgs[0].desc;
+		//this.retrieveData();
+        //tempFlag.refresh = !tempFlag.refresh;
+		
+		this.imgs = this.check_imgs;
+		//this.imgs[0].desc = this.recipe_idslist;
+		//this.imgs[0].desc = this.res.data;
       },
       refreshClick() {
-        tempFlag.search = !tempFlag.search;
-        const arr = this.imgs.concat(tempFlag.search ? testData1 : testData2);
+		this.retrieveData();
+        //tempFlag.search = !tempFlag.search;
+        const arr = this.imgs.concat(this.check_imgs);
         this.imgs = arr;
       },
       handleImageHover(item) {
