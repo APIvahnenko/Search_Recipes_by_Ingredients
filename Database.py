@@ -21,8 +21,8 @@ class Database:
         self.cursor.execute("""CREATE TABLE ingredient_index (
                                ingredient             VARCHAR(255),
                                recipe_ids             BLOB,
-                               ingredient_synonyms    VARCHAR(255),
-                               ingredient_temperature VARCHAR(255))""")
+                               ingredient_synonyms    VARCHAR(1000),
+                               ingredient_temperature VARCHAR(1000))""")
     
     # def CreateIngredientIndexTable(self):
     #     self.cursor.execute("DROP TABLE IF EXISTS ingredient_index")
@@ -57,6 +57,7 @@ class Database:
             self.cursor.execute("INSERT INTO ingredient_index\
                                  (ingredient, recipe_ids)    \
                                  VALUES (%s, %s)", (ingredient, encode(recipeIds)))
+                                 
         else:
             self.cursor.execute("SELECT recipe_ids    \
                                  FROM ingredient_index\
@@ -91,20 +92,63 @@ class Database:
     # 
     #     self.database.commit()
     
+    def AddIngredientSynonymsToIngredientIndexTable(self, ingredient, ingredientSynonyms):
+        self.cursor.execute("SELECT count(*)      \
+                             FROM ingredient_index\
+                             WHERE ingredient = %s", ingredient)
+        
+        if self.cursor.fetchone()[0] == 0:    # Cannot find the ingredient.
+            print("ERROR: Cannot find %s." % ingredient)
+            
+        else:                 
+            self.cursor.execute("UPDATE ingredient_index\
+                                 SET ingredient_synonyms = %s    \
+                                 WHERE ingredient = %s", (ingredientSynonyms, ingredient))         
+            self.database.commit()
     
+    def GetIngredientSynonyms(self, ingredient):
+        self.cursor.execute("SELECT count(*)      \
+                             FROM ingredient_index\
+                             WHERE ingredient = %s", ingredient)
+        
+        if self.cursor.fetchone()[0] == 0:    # Cannot find the ingredient.
+            print("ERROR: Cannot find %s." % ingredient)
+            return None
+            
+        else:
+            self.cursor.execute("SELECT ingredient_synonyms\
+                                 FROM ingredient_index     \
+                                 WHERE ingredient = %s", ingredient)
+            return self.cursor.fetchone()[0]
     
+    def AddIngredientTemperatureToIngredientIndexTable(self, ingredient, ingredientTemperature):
+        self.cursor.execute("SELECT count(*)      \
+                             FROM ingredient_index\
+                             WHERE ingredient = %s", ingredient)
+        
+        if self.cursor.fetchone()[0] == 0:    # Cannot find the ingredient.
+            print("ERROR: Cannot find %s." % ingredient)
+            
+        else:
+            self.cursor.execute("UPDATE ingredient_index\
+                                 SET ingredient_temperature = %s    \
+                                 WHERE ingredient = %s", (ingredientTemperature, ingredient))  
+            self.database.commit()
     
-    
-    
-    
-    #def AddIngredientSynonymsToIngredientIndexTable(self, ingredient, ingredientSynonyms):
-    #def GetIngredientSynonyms(self, ingredient):
-    #def GetExtendedRecipeIds(self, ingredients):
-    #def AddIngredientTemperatureToIngredientIndexTable(self, ingredient, ingredientTemperature):
-    #def GetIngredientTemperature(self, ingredientTemperature): 
-    
-    
-    
+    def GetIngredientTemperature(self, ingredient): 
+        self.cursor.execute("SELECT count(*)      \
+                             FROM ingredient_index\
+                             WHERE ingredient = %s", ingredient)
+        
+        if self.cursor.fetchone()[0] == 0:    # Cannot find the ingredient.
+            print("ERROR: Cannot find %s." % ingredient)
+            return None
+            
+        else:
+            self.cursor.execute("SELECT ingredient_temperature\
+                                 FROM ingredient_index        \
+                                 WHERE ingredient = %s", ingredient)
+            return self.cursor.fetchone()[0]
     
     def AddToRecipeInfoTable(self, recipeId, recipeUrl, imageUrl, title, description,
                              preparationTime, cookTime, servingCount, ingredientCount):
@@ -117,8 +161,39 @@ class Database:
         self.database.commit()
     
     def GetRecipeIds(self, ingredient):
-        self.cursor.execute("SELECT recipe_ids    \
+        self.cursor.execute("SELECT count(*)      \
                              FROM ingredient_index\
                              WHERE ingredient = %s", ingredient)
-        return decode(self.cursor.fetchone()[0])
-        # return self.cursor.fetchone()[0] 
+        
+        if self.cursor.fetchone()[0] == 0:    # Cannot find the ingredient.
+            print("ERROR: Cannot find %s." % ingredient)
+            return []
+            
+        else:
+            self.cursor.execute("SELECT recipe_ids    \
+                                 FROM ingredient_index\
+                                 WHERE ingredient = %s", ingredient)
+            return decode(self.cursor.fetchone()[0])
+            # return self.cursor.fetchone()[0]
+    
+    def GetExtendedRecipeIds(self, ingredient):
+        self.cursor.execute("SELECT count(*)      \
+                             FROM ingredient_index\
+                             WHERE ingredient = %s", ingredient)
+        
+        if self.cursor.fetchone()[0] == 0:    # Cannot find the ingredient.
+            print("ERROR: Cannot find %s." % ingredient)
+            return []
+        
+        ingredientSynonyms = self.GetIngredientSynonyms(ingredient)
+        recipeIds          = self.GetRecipeIds(ingredient)
+        
+        if ingredientSynonyms == None:
+            return recipeIds
+            
+        else:
+            ingredientSynonyms = ingredientSynonyms.split(",")
+            for ingredientSynonym in ingredientSynonyms:
+                recipeIds = recipeIds + self.GetRecipeIds(ingredientSynonym)
+            recipeIds = list(set(recipeIds))    # Remove repeating recipe IDs.
+            return recipeIds
