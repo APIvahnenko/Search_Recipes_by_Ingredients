@@ -9,7 +9,7 @@ class RecipeParser:
                         "recepie_project_all_recipes/ttds-project/contents.txt",
                         "recepie_project_epicurious/ttds-project/contents.txt",
                         "recepie_project_food/ttds-project/contents.txt",
-                        "recipe_myrecipes.com_project/ttds-project/crawled.txt"]
+                        "recipe_myrecipes.com_project/ttds-project/myrecipes_content.txt"]
     # recipeFiles      = ["test_database/content_all_recipes.txt",
     #                     "test_database/content_bbc.txt",
     #                     "test_database/content_epicurious.txt",
@@ -54,7 +54,7 @@ class RecipeParser:
             # filtered_ing = [w for w in ing_words if w not in self.stop_words]
             filtered_ing = []
             for w in ing_words:
-                if w not in self.stop_words:
+                if w.lower() not in self.stop_words:
                     filtered_ing.append(w)
 
             #stemming
@@ -146,7 +146,7 @@ class RecipeParser:
                 hours = 0
 
             else:
-                print("1. TIME INPUT ERROR: ", string, " URL: ", url)
+                print("1. TIME INPUT ERROR: ", string.encode("utf-8"), " URL: ", url)
                 return "skip this recipe"
 
         return days*1440 + hours*60 + minutes
