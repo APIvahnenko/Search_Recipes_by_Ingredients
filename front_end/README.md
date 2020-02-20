@@ -2,6 +2,8 @@
 
 ## Project setup
 ```
+Install NodeJs.
+npm i axios 
 npm install
 ```
 
