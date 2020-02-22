@@ -1,15 +1,15 @@
-#!/usr/bin/env python3
+ #!/usr/bin/env python3
 
 import re
 from nltk.stem import PorterStemmer
 from Database import *
 
 class RecipeParser:
-    recipeFiles      = ["recepie_project/ttds-project-bbc/content.txt",
+    recipeFiles      = ["recepie_project/ttds-project-bbc/content.txt"]
                         "recepie_project_all_recipes/ttds-project/contents.txt",
                         "recepie_project_epicurious/ttds-project/contents.txt",
-                        "recepie_project_food/ttds-project/contents.txt",
-                        "recipe_myrecipes.com_project/ttds-project/myrecipes_content.txt"]
+                        "recepie_project_food/ttds-project/contents.txt",]
+                        # "recipe_myrecipes.com_project/ttds-project/myrecipes_content.txt"]
     # recipeFiles      = ["test_database/content_all_recipes.txt",
     #                     "test_database/content_bbc.txt",
     #                     "test_database/content_epicurious.txt",
@@ -27,6 +27,7 @@ class RecipeParser:
         self.ps             = PorterStemmer()
         self.stop_words     = self.GetStopWords()
         self.recipe_classes = self.GetRecipeClasses()
+        self.common_ing     = self.GetCommonIngClasses()
 
     def GetStopWords(self):
         return [stop_words.rstrip('\n') for stop_words in open("recipe_stopwords.txt", 'r', encoding = "utf8")]
@@ -34,44 +35,81 @@ class RecipeParser:
     def GetRecipeClasses(self):
         return [recipe_classes.rstrip('\n') for recipe_classes in open("classes.txt", 'r', encoding = "utf-8")]
 
+    def GetCommonIngClasses(self):
+        return [recipe_classes.rstrip('\n') for recipe_classes in open("known_ing.txt", 'r', encoding = "utf-8")]
+
     def cleaning_ing_list(self, ingredients):
         list_of_ing = []
+        f = open("what_is_left.txt","a+")
+        common_ing_list = []
 
         for ing in ingredients:
-            #removing text in brackets
-            ing = re.sub("\s?[\(\[].*?[\)\]]", "", ing)
-
-            #removing anything extra in the ingredient discription (after ',')
-            if "," in ing:
-                clean_ing, extra = ing.split(',', 1)
-                ing = clean_ing
 
             #ing only words
             pattern = re.compile(r"\b[a-zA-Z-]+\b")
             ing_words = pattern.findall(ing)
+            ing = (' '.join(ing_words).lower())
+            print("ingi: ", ing)
 
-            #removing stopwords
-            # filtered_ing = [w for w in ing_words if w not in self.stop_words]
-            filtered_ing = []
-            for w in ing_words:
-                if w.lower() not in self.stop_words:
-                    filtered_ing.append(w)
+            common_ing_present = []
+            ing_copy  = ing
+            # ing_removed_string = ""
+            what_string_left = ""
 
-            #stemming
-            clean_ing = []
-            for word in filtered_ing:
-                clean_ing.append(word)
-                # clean_ing.append(self.ps.stem(word)) ####dissabled stemming
+            for common_ing in self.common_ing:
+                if common_ing in ing_copy:
 
-            #lower caseing & appending
-            if len(clean_ing) > 0:
-                list_of_ing.append(' '.join(clean_ing).lower())
+                    ing_copy = ing_copy.replace(common_ing,'')
+                    common_ing_present.append(common_ing)
+                    what_string_left = ing_copy
+
+            #if common ingredients list not empty
+            if common_ing_present:
+                common_ing_list.extend(common_ing_present)
+
+                if len(what_string_left) > 0 :
+                    f.write("%s | %s\n" % (what_string_left, ing))
+
+                print("comm: ", common_ing_present)
+                print("left: ", what_string_left.encode("utf-8"), "\n")
+
+            else:
+                #removing text in brackets
+                ing = re.sub("\s?[\(\[].*?[\)\]]", "", ing)
+
+                #removing anything extra in the ingredient discription (after ',')
+                if "," in ing:
+                    clean_ing, extra = ing.split(',', 1)
+                    ing = clean_ing
+
+                #removing stopwords
+                filtered_ing = []
+                for w in ing.split():
+                    if w not in self.stop_words:
+                        filtered_ing.append(w)
+
+                #stemming
+                clean_ing = []
+                for word in filtered_ing:
+                    clean_ing.append(word)
+                    # clean_ing.append(self.ps.stem(word)) ####dissabled stemming
+
+                #lower caseing & appending
+                if len(clean_ing) > 0:
+                    list_of_ing.append(' '.join(clean_ing).lower())
+                    print("othe: ", ' '.join(clean_ing).lower(), "\n")
 
         final_list = []
-        final_set = set(list_of_ing)
+
+        print("common list: ", common_ing_list)
+        print("uncomm list: ", list_of_ing, "\n")
+
+        final_set = set(common_ing_list + list_of_ing)
+
         for item in final_set:
             final_list.append(item)
 
+        f.close()
         return final_list
 
     def recipe_class(self, title, discription_text):
