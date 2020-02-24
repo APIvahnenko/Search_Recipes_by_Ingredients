@@ -2,6 +2,22 @@
 from __future__ import division 
 from struct import pack, unpack
 
+def get_deltas(numbers):
+    deltas = []
+    if len(numbers) == 0 or len(numbers) == 1:
+        return numbers
+    deltas = [numbers[0]] + [j - i for i, j in zip(numbers[:-1], numbers[1:])]
+    return deltas
+    
+def get_numbers(deltas):
+    numbers = []
+    if len(deltas) == 0 or len(deltas) == 1:
+        return deltas
+    numbers.append(deltas[0])
+    for delta in deltas[1:]:
+        numbers.append(numbers[-1] + delta)
+    return numbers
+
 def encode_number(number):
     """Variable byte code encode number.
     Usage:
@@ -18,6 +34,8 @@ def encode_number(number):
     return pack('%dB' % len(bytes_list), *bytes_list)
 
 def encode(numbers):
+    # numbers = get_deltas(numbers)
+    
     """Variable byte code encode numbers.
     Usage:
       import vbcode
@@ -45,4 +63,7 @@ def decode(bytestream):
             n = 128 * n + (byte - 128)
             numbers.append(n)
             n = 0
+    
+    # numbers = get_numbers(numbers)
+    
     return numbers
