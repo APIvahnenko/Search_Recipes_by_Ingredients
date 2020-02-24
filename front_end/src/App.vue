@@ -1,9 +1,32 @@
 <template>
   <div id="app">
-    <div class="home col">
+    <div class="home col" @keydown="handleSearchClick">
       <section class="first row" :class="{'shadow':isShowShadow}">
         <el-autocomplete
                 class="search"
+                v-model="inputValue"
+                :class="{'fixsearch':isShowSearch}"
+                :fetch-suggestions="querySearch"
+                placeholder="please input your ingredient"
+                @select="handleSelect"
+        >
+          <!--这里是搜索框的内容-->
+          <!--select这里会显示所选的内容-->
+          <el-button slot="append" icon="el-icon-search" @click="handleSearchClick"></el-button>
+<!--          按下回车键既可以进行搜索-->
+        </el-autocomplete>
+        <section class="checkbox-area">
+          <el-checkbox-group v-model="checkGroup">
+            <el-checkbox label="Very Hungry"></el-checkbox>
+            <el-checkbox label="I Can Go Shopping"></el-checkbox>
+          </el-checkbox-group>
+        </section>
+      </section>
+
+      <section class="second col">
+        <!-- 下拉折叠区域 -->
+        <el-autocomplete
+                class="movesearch"
                 v-model="inputValue"
                 :fetch-suggestions="querySearch"
                 placeholder="please input your ingredient"
@@ -12,10 +35,8 @@
           <!--这里是搜索框的内容-->
           <!--select这里会显示所选的内容-->
           <el-button slot="append" icon="el-icon-search" @click="handleSearchClick"></el-button>
+          <!--          按下回车键既可以进行搜索-->
         </el-autocomplete>
-      </section>
-      <section class="second col">
-        <!-- 下拉折叠区域 -->
         <section class="collapse-area">
           <div class="triangle" @click="foldAll">
             <div class="triangle-item" :class="{'rotate':isCollapse}"></div>
@@ -64,8 +85,13 @@
                   <i class="el-icon-picture-outline"></i>
                 </div>
               </el-image>
-              <div class="img-hover-info" v-show="item.isHover">
-                {{item.desc}}
+              <div class="img-hover-info" v-show="item.isHover" @click="() => handleJumpClick(item)">
+                <div class="title">
+                  {{item.title}}
+                </div>
+                <div class="desc">
+                  {{item.desc}}
+                </div>
 <!--                <span v-for="desc in item.desc" :key="desc">{{desc}}</span>-->
               </div>
             </div>
@@ -84,57 +110,75 @@
   import BackToTop from "./components/backToTop";
   const testData1 = [
     {
+      url: "http://www.baidu.com",
       id: 1,
       src:
           "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+      title: "title",
       desc: "hi testdata1"
     },
     {
+      url: "",
       id: 2,
       src:
           "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+      title: "",
       desc: "图片描述"
     },
     {
+      url: "",
       id: 3,
       src:
           "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+      title: "",
       desc: "图片描述"
     },
     {
+      url: "",
       id: 4,
       src:
           "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+      title: "",
       desc: "图片描述"
     },
     {
+      url: "",
       id: 5,
       src:
           "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+      title: "",
       desc: "图片描述"
     },
     {
+      url: "",
       id: 6,
       src:
           "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+      title: "",
       desc: "图片描述"
     },
     {
+      url: "",
       id: 7,
       src:
           "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+      title: "",
       desc: "图片描述"
     },
     {
+      url: "",
       id: 8,
       src:
           "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+      title: "",
       desc: "图片描述"
     },
     {
+      url: "",
       id: 9,
       src:
           "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+      title: "",
       desc: "图片描述"
     }
   ];
@@ -206,6 +250,7 @@
     data() {
       return {
         isShowShadow: false,
+        isShowSearch: false,
         isCollapse: false,
         imgs: [],
 		//added part
@@ -219,7 +264,8 @@
         activeNames: [0],
         selectCheck: [],
         checkData: DataList.checkBox,
-        checkList: []
+        checkList: [],
+        checkGroup: []
       };
     },
     computed: {
@@ -241,11 +287,16 @@
       window.removeEventListener("scroll", this.handleScroll, true);
     },
     methods: {
+      handleJumpClick(item) {
+        window.location.href = item.url
+      },
       //监听页面下滚150px
       handleScroll(e) {
         const scrollTop =
             document.documentElement.scrollTop || document.body.Scroller;
-        this.isShowShadow = scrollTop > 0;
+        this.isShowShadow = scrollTop > 500;
+        this.isShowSearch = scrollTop > 500;
+      //  页面一旦滑动一段距离，就弹出悬浮搜索框
       },
       handleAddCheck(value) {
         var index = this.selectCheck.indexOf(value);
@@ -293,7 +344,8 @@
               // 传递参数
               params: {
                 city: 'hi',
-				recipe:'whatsup'
+				recipe:'whatsup',
+                checkGroup: this.checkGroup
               }
             });
             //.then((response) => {
@@ -399,7 +451,7 @@
   .row {
     display: flex;
     flex-flow: row wrap;
-    justify-content: center;
+    justify-content: left;
     align-items: center;
   }
   .home {
@@ -407,35 +459,66 @@
     width: 100%;
     width: 100%;
     background: black;
+    /*background: url('https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg');*/
+    /*用url设置背景图*/
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: 100% 100%;
+    /*最底层页面*/
+
+
     .first {
       position: fixed;
       top: 0;
       z-index: 100;
       width: 100%;
-      .search {
-        width: 500px;
-        margin-top: 30px;
+
+      .checkbox-area{
+        margin-top: 4px;
+        font-size: 50px;
+        width: 900px;
+        opacity: 0.9;
         margin-bottom: 30px;
+      /*  设置本区域里悬浮框底部的距离*/
       }
+      .col
     }
+    .search{
+      width: 500px;
+      margin-top: 500px;
+      margin-bottom: 10px;
+    }
+    .fixsearch {
+      width: 500px;
+      margin-top: 500px;
+      margin-bottom: 10px;
+    }
+
     .shadow {
       box-shadow: 1px 1px 3px black;
-      background-color: black !important;
-      background-image: linear-gradient(180deg, black 19%, black 80%) !important;
+      background: url("./assets/fast-food.jpg");
+      /*background-color: red !important;*/
+      /*background-image: linear-gradient(180deg, white 19%, black 80%) !important;*/
+    /*  悬浮搜索框和底层页面间的阴影*/
+
     }
     .second {
       box-sizing: border-box;
       padding: 30px 350px 0 350px;
       width: 100%;
+      .movesearch {
+        width: 500px;
+        margin-top: 500px;
+        margin-bottom: 10px;
+      }
       .collapse-area {
-        margin-top: 100px;
+        margin-top: 500px;
         width: 1250px;
-        opacity: 0.5;
+        opacity: 0.9;
+      /*  不透明度*/
       }
       .collapse-panel {
+        margin-top: 10px;
         animation-name: fadeIn; /*动画名称*/
         animation-duration: 0.5s; /*动画持续时间*/
         animation-iteration-count: 1; /*动画次数*/
@@ -447,11 +530,11 @@
       .img-contaienr {
         width: 1250px;
         flex-wrap: wrap;
-        margin-top: 80px;
+        margin-top: 30px;
         .img-item {
-          width: 380px;
-          height:200px;
-          margin: 0px 2px;
+          width: 400px;
+          /*height:233px;*/
+          margin: 4px 4px;
           position: relative;
           .image-slot {
             width: 380px;
@@ -463,7 +546,7 @@
             color: aqua;
           }
           .img-hover-info {
-            width:380px;
+            width:100%;
             height:100%;
             position:absolute;
             top:0px;
@@ -484,7 +567,7 @@
             /*position: absolute;*/
             /*top: 0px;*/
             /*left: 0px;*/
-            background: rgba(255, 165, 79, 0.5);
+            background: rgba(90,90,90,0.5);
             /*text-align: left;*/
             /*display: flex;*/
             /*align-items:center;*/
@@ -492,6 +575,12 @@
             /*color: #fff;*/
             /*word-break: break-all;*/
             /*word-wrap: break-word;*/
+            .title {
+              font-size: 30px;
+            }
+            .desc {
+              font-size: 10px;
+            }
           }
         }
       }
@@ -502,9 +591,12 @@
   }
   .triangle {
     //width: 100%;
-    height: 30px;
+    /*margin-left: 10px;*/
+    height: 10px;
     line-height: 30px;
-    font-size: 30px;
+    font-size: 20px;
+    margin-top: 100px;
+    /*"Select what you want"字体大小调节*/
     text-align: left;
     display: flex;
     align-items: center;
@@ -544,5 +636,12 @@
   .fig{
     width:100%;
     height:100%;
+  }
+</style>
+<style lang="less">
+  .home {
+    .el-image {
+      display: unset
+    }
   }
 </style>
