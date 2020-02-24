@@ -57,7 +57,7 @@ class RecipeParser:
             short_words_present = []
             for w in ing_words:
                 if w in self.common_ing_f:
-                    short_words_present.append(w)
+                    short_words_present.append(self.ps.stem(w))
                     ing_words.remove(w)
                     # print("SHORT W: ", w)
 
@@ -73,7 +73,7 @@ class RecipeParser:
                 if common_ing in ing_copy:
 
                     ing_copy = ing_copy.replace(common_ing,' ')
-                    common_ing_present.append(common_ing)
+                    common_ing_present.append(self.ps.stem(common_ing))
                     what_string_left = ing_copy
 
             #if common ingredients list not empty
@@ -112,8 +112,8 @@ class RecipeParser:
                 #stemming
                 clean_ing = []
                 for word in filtered_ing:
-                    clean_ing.append(word)
-                    # clean_ing.append(self.ps.stem(word)) ####dissabled stemming
+                    # clean_ing.append(word)
+                    clean_ing.append(self.ps.stem(word)) ####dissabled stemming
 
                 #lower caseing & appending
                 if len(clean_ing) > 0:

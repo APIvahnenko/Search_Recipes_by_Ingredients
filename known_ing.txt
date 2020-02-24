@@ -323,7 +323,6 @@ turkey bacon
 valpolicella
 vienna-roast
 walnut tuile
-veal cushion
 tomato paste
 tahina sauce
 sweet potato
@@ -1144,7 +1143,6 @@ cracker
 crimini
 crumble
 cupcake
-cushion
 cutlets
 defrost
 dessert
@@ -1598,7 +1596,6 @@ agave
 aioli
 amaro
 amino
-amish
 ancho
 anise
 bacon
@@ -1732,11 +1729,8 @@ wagyu
 walla
 welsh
 wheat
-white
 yeast
 yukon
-tongs
-tacos
 tabil
 sushi
 sumac
@@ -1814,6 +1808,8 @@ arbol
 arame
 anjou
 alder
+tong
+taco
 milk
 corn
 chil
