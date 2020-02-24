@@ -5,11 +5,11 @@ from nltk.stem import PorterStemmer
 from Database import *
 
 class RecipeParser:
-    recipeFiles      = ["recepie_project/ttds-project-bbc/content.txt"]
+    recipeFiles      = ["recepie_project/ttds-project-bbc/content.txt",
                         "recepie_project_all_recipes/ttds-project/contents.txt",
                         "recepie_project_epicurious/ttds-project/contents.txt",
-                        "recepie_project_food/ttds-project/contents.txt",]
-                        # "recipe_myrecipes.com_project/ttds-project/myrecipes_content.txt"]
+                        "recepie_project_food/ttds-project/contents.txt",
+                        "recipe_myrecipes.com_project/ttds-project/myrecipes_content.txt"]
     # recipeFiles      = ["test_database/content_all_recipes.txt",
     #                     "test_database/content_bbc.txt",
     #                     "test_database/content_epicurious.txt",
@@ -25,9 +25,10 @@ class RecipeParser:
     def __init__(self):
         self.database       = Database("recipes")
         self.ps             = PorterStemmer()
-        self.stop_words     = self.GetStopWords()
-        self.recipe_classes = self.GetRecipeClasses()
-        self.common_ing     = self.GetCommonIngClasses()
+        self.stop_words     = self.GetStopWords() #discriptive words
+        self.recipe_classes = self.GetRecipeClasses() #lables
+        self.common_ing     = self.GetCommonIng() #common ingredients that can be embedded e.g. "anise-flavored"
+        self.common_ing_f   = self.GetCommonIngFullWords() #words that need to mached fully e.g. "tea"
 
     def GetStopWords(self):
         return [stop_words.rstrip('\n') for stop_words in open("recipe_stopwords.txt", 'r', encoding = "utf8")]
@@ -35,12 +36,15 @@ class RecipeParser:
     def GetRecipeClasses(self):
         return [recipe_classes.rstrip('\n') for recipe_classes in open("classes.txt", 'r', encoding = "utf-8")]
 
-    def GetCommonIngClasses(self):
+    def GetCommonIng(self):
         return [recipe_classes.rstrip('\n') for recipe_classes in open("known_ing.txt", 'r', encoding = "utf-8")]
+
+    def GetCommonIngFullWords(self):
+        return [recipe_classes.rstrip('\n') for recipe_classes in open("known_ing_full.txt", 'r', encoding = "utf-8")]
 
     def cleaning_ing_list(self, ingredients):
         list_of_ing = []
-        f = open("what_is_left.txt","a+")
+        # f = open("what_is_left.txt","a+")
         common_ing_list = []
 
         for ing in ingredients:
@@ -48,30 +52,47 @@ class RecipeParser:
             #ing only words
             pattern = re.compile(r"\b[a-zA-Z-]+\b")
             ing_words = pattern.findall(ing)
-            ing = (' '.join(ing_words).lower())
-            print("ingi: ", ing)
 
+            #removing ingredients that match mistakenly to other things
+            short_words_present = []
+            for w in ing_words:
+                if w in self.common_ing_f:
+                    short_words_present.append(w)
+                    ing_words.remove(w)
+                    # print("SHORT W: ", w)
+
+            ing = (' '.join(ing_words).lower())
+            # print("ingi: ", ing)
+
+            #looking for ingredients that are commonly used
             common_ing_present = []
             ing_copy  = ing
-            # ing_removed_string = ""
             what_string_left = ""
 
             for common_ing in self.common_ing:
                 if common_ing in ing_copy:
 
-                    ing_copy = ing_copy.replace(common_ing,'')
+                    ing_copy = ing_copy.replace(common_ing,' ')
                     common_ing_present.append(common_ing)
                     what_string_left = ing_copy
 
             #if common ingredients list not empty
-            if common_ing_present:
-                common_ing_list.extend(common_ing_present)
+            if common_ing_present or short_words_present:
 
-                if len(what_string_left) > 0 :
-                    f.write("%s | %s\n" % (what_string_left, ing))
+                ing_expanded = (' '.join(short_words_present + common_ing_present))
+                common_ing_list.extend(short_words_present + common_ing_present)
+                common_ing_list.append(ing_expanded)
 
-                print("comm: ", common_ing_present)
-                print("left: ", what_string_left.encode("utf-8"), "\n")
+                # if len(what_string_left) > 0 :
+                    # f.write("%s | %s\n" % (what_string_left, ing))
+
+                # print("comm: ", ing_expanded)
+                # print("left: ", what_string_left.encode("utf-8"), "\n")
+
+            # if what_string_left:
+            #
+            #     print(what_string_left)
+            #     ing = what_string_left
 
             else:
                 #removing text in brackets
@@ -97,19 +118,19 @@ class RecipeParser:
                 #lower caseing & appending
                 if len(clean_ing) > 0:
                     list_of_ing.append(' '.join(clean_ing).lower())
-                    print("othe: ", ' '.join(clean_ing).lower(), "\n")
+                    # print("othe: ", ' '.join(clean_ing).lower(), "\n")
 
         final_list = []
 
-        print("common list: ", common_ing_list)
-        print("uncomm list: ", list_of_ing, "\n")
+        # print("common list: ", common_ing_list)
+        # print("uncomm list: ", list_of_ing, "\n")
 
         final_set = set(common_ing_list + list_of_ing)
 
         for item in final_set:
             final_list.append(item)
 
-        f.close()
+        # f.close()
         return final_list
 
     def recipe_class(self, title, discription_text):
