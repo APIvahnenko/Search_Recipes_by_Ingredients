@@ -205,12 +205,15 @@ class RecipeParser:
             elif string.isdigit():
                 minutes = int(string)
 
-            elif "0S" in string.lower():
+            elif "0s" in string.lower():
                 hours = 10 ### Error in parsing recipe given large prep time
 
             elif "none" in string.lower():
                 hours = 0
-
+            
+            elif "=" in string.lower():
+                hours = 10 ### Error in parsing recipe given large prep time
+            
             else:
                 print("1. TIME INPUT ERROR: ", string.encode("utf-8"), " URL: ", url)
                 return "skip this recipe"
@@ -281,6 +284,10 @@ class RecipeParser:
 
                 #if the recipe has parsing issues
                 if cook_time =="skip this recipe" or prep_time =="skip this recipe":
+                    line_num    = 1
+                    ing_num     = 0
+                    ingredients = []
+                    description = ""
                     continue
 
                 # print(str(ingredients).encode("utf-8"))
