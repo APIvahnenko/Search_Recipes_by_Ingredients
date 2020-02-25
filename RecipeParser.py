@@ -15,6 +15,9 @@ class RecipeParser:
     #                     "test_database/content_epicurious.txt",
     #                     "test_database/content_food.txt",
     #                     "test_database/content_my_recipes.txt"]
+    # recipeFiles      = ["continue_to_add_from_here/food_contents.txt",
+    #                     "continue_to_add_from_here/myrecipes_content.txt"]
+                        
     recipeFileHandle = None
     database         = None
     ps               = None
@@ -22,14 +25,18 @@ class RecipeParser:
     recipe_classes   = None
     recipe_id        = 0
 
-    def __init__(self):
-        self.database       = Database("recipes")
+    def __init__(self, recipe_id = 0):
+        if recipe_id != 0:
+            self.database   = Database("recipes", append = True)
+        else:
+            self.database   = Database("recipes")
+        self.recipe_id      = recipe_id
         self.ps             = PorterStemmer()
         self.stop_words     = self.GetStopWords() #discriptive words
         self.recipe_classes = self.GetRecipeClasses() #lables
         self.common_ing     = self.GetCommonIng() #common ingredients that can be embedded e.g. "anise-flavored"
         self.common_ing_f   = self.GetCommonIngFullWords() #words that need to mached fully e.g. "tea"
-
+    
     def GetStopWords(self):
         return [stop_words.rstrip('\n') for stop_words in open("recipe_stopwords.txt", 'r', encoding = "utf8")]
 
