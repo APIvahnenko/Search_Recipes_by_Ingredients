@@ -7,11 +7,12 @@ class Database:
     database = None
     cursor   = None
     
-    def __init__(self, databaseName):
+    def __init__(self, databaseName, append = False):
         self.database = pymysql.connect("localhost", "root", "", databaseName)
         self.cursor   = self.database.cursor()
-        self.CreateIngredientIndexTable()
-        self.CreateRecipeInfoTable()
+        if not append:
+            self.CreateIngredientIndexTable()
+            self.CreateRecipeInfoTable()
     
     def __del__(self):
         self.database.close()
