@@ -474,6 +474,7 @@
 			  if(response.data.error==1){
 			  this.recipe_ids = this.mounted_imgsids;
 			  this.length_recipe_ids = this.mounted_imgsids.length;
+			  
 			  }
 				
 			  await this.retrieveData(1);
@@ -489,8 +490,7 @@
       //每次取的时候先写个函数去修改它的key，image1=image+'1'这样
 	
       async handleSearchClick() {
-	  if(this.isCollapse){
-		await this.foldAll()}
+	  
 		this.noresultsmessage = "";
 		this.error = false;
 		this.refresh_button = true;
@@ -501,6 +501,8 @@
         //tempFlag.refresh = !tempFlag.refresh;
 		
 		this.imgs = this.check_imgs;
+		if(this.isCollapse){
+		await this.foldAll()}
 		this.check_imgs = [];
 		if(this.length_recipe_ids!=0){
 			this.noresultsmessage = "Hooray! we fetched "+this.length_recipe_ids+" delicious recipes for you:)"
