@@ -9,6 +9,8 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 CORS(app,resources={r'/*': {'origins': '*'}})
 
+
+
 def getweather1(latitude ,longitude):
     import json
     from urllib import request
@@ -217,8 +219,15 @@ def test():
             #word = PorterStemmer().stem(word)
         format_strings = ','.join(['%s'] * len(query_list))
         #query_str = "("+query_str+")"
-        print(query_list)
         #sql = "SELECT recipe_ids FROM ingredient_index WHERE ingredient IN (%s)".format(query_str)
+        cursor.execute("SELECT synonym FROM synonym_table WHERE ingredient IN (%s)" %format_strings,tuple(query_list))
+        results = cursor.fetchall()
+        synonym = []
+        for row in results:
+            synonym += row[0].strip().split(',')
+        query_list += synonym
+        print(query_list)
+        format_strings = ','.join(['%s'] * len(query_list))
         cursor.execute("SELECT recipe_ids FROM ingredient_index WHERE ingredient IN (%s)" %format_strings,tuple(query_list))
         results = cursor.fetchall()
         if len(results)==0:

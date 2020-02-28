@@ -51,7 +51,7 @@
             class="collapse-panel"
           >
             <el-collapse-item :name="index" v-for="(item,index) in checkData" :key="index">
-              <p style="margin-left:15px;" slot="title" >
+              <p style="margin-left:15px;color:#fff;font-size:17px;font-weight: 600;font-family:'Open Sans';" slot="title" >
                 <el-icon
                   class="el-icon-arrow-right"
                   :class="{'rotate':activeNames.includes(index)}"
@@ -59,8 +59,8 @@
                 {{item.title}}
               </p>
               <el-row>
-                <el-col :span="4" v-for="(sub,key) in item.check" :key="key" style="text-align:left ; margin-left: 170px">
-                  <el-checkbox :label="sub" @change="handleAddCheck(sub)"></el-checkbox>
+                <el-col :span="4" v-for="(sub,key) in item.check" :key="key" style="text-align:left ; margin-left: 170px;">
+                  <el-checkbox :label="sub" @change="handleAddCheck(sub)" style="color:#fff;font-size:20px;letter-spacing:1px;"></el-checkbox>
                 </el-col>
               </el-row>
             </el-collapse-item>
@@ -72,9 +72,9 @@
             element-loading-spinner="el-icon-loading"
             element-loading-background="rgba(0, 0, 0, 0.8)"
           >
-          <p v-if="loading">{{ loading_text }}</p>
-          <p v-if="message.length" style="margin-left:25px;size:14px" class="text-color" >{{message}}</p>
-		  <p v-if="refresh_message.length" style="margin-left:25px;size:14px" class="text-color">{{refresh_message}}</p>
+          <p v-if="loading" style="font-size:17px;letter-spacing: 2px;">{{ loading_text }}</p>
+          <p v-if="message.length" style="margin-left:25px;font-size:17px;letter-spacing: 2px;" class="loading" >{{message}}</p>
+		  <p v-if="refresh_message.length" style="margin-left:25px;font-size:20px;letter-spacing: 2px;" class="text-color">{{refresh_message}}</p>
 		  </div>
         </section>
       </section>
@@ -400,13 +400,15 @@
 		this.counter++;
 		}
 		else{
-		this.refresh_button = false;
+		
 		//this.refresh_message = this.counter+" "+this.length_recipe_ids;
-		this.refresh_message = "No more results"
+		
 		this.check_imgs = [];
-		if(this.recipe_idslist.length){
+		if(recipe_idslist.length){
 			break;
 		}
+		this.refresh_message = "No more results"
+		this.refresh_button = false;
 		return ;
 		}
 	  }
@@ -438,6 +440,11 @@
       async getData() {
 		try{
 			this.message = "";
+			
+			if(this.inputValue.length==0){
+				this.message = "Please type ingredients to search!"
+				return;
+			}
 			this.loading = true;
          const response = await axios.get("http://127.0.0.1:5000/test", {
               // 传递参数
@@ -780,11 +787,11 @@ html,
     display: unset;
   }
   .el-collapse-item__wrap {
-    background-color: red;
+    background-color: #151723;
   }
   .el-collapse-item__header {
-    background-color: blue;
-    border-bottom: 1px solid blue;
+    background-color: #151723;
+    border-bottom: 1px solid #151723;
   }
   .loading {
     text-align: left;
