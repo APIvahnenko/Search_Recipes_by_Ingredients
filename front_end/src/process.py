@@ -139,7 +139,7 @@ def getip():
         except:
             temp_list = [ps.stem('spring')]
             json_dict['recipe_info'] = gettemplist(temp_list)
-            json_dict['message'] = "Welcome culinary chef! . Here is our suggestions"
+            json_dict['message'] = "Welcome culinary chef! Here are our suggestions for the day"
 
     else:
         json_dict = {'recipe_info':[],'weather':0,'message':"",'length':""}
@@ -152,8 +152,9 @@ def getip():
             recipe_id_list = []
             for row1 in results:
                 recipe_id_list += decode(row1[0])
+        mess = time_message+"Welcome culinary chef! "
         json_dict['recipe_info'] = recipe_id_list
-        json_dict['message'] = message
+        json_dict['message'] = mess+message
         json_dict['length'] = len(recipe_id_list)
         return json.dumps(json_dict)
         """
@@ -232,7 +233,7 @@ def test():
         results = cursor.fetchall()
         if len(results)==0:
                 #sys.exit(1)
-            return json.dumps({'id':[],'length':0,'error':1,'message':"Hmm! seems weird with the ingredient. May be other galaxy origin. How about some recipes from our earth"})
+            return json.dumps({'id':[],'length':0,'error':1,'message':"Sorry! The Ingredient does not seem familiar. But here are some suggestions from our side"})
         for row in results:
             recipe_id_list = decode(row[0])
             for recipe_id in recipe_id_list:
@@ -335,7 +336,7 @@ def test():
                     sorted_items = sorted(value,key=lambda k:k[1])
                     clash_dict[key] = sorted_items
                 clash_dict = sorted(clash_dict.items())
-                json_dict['message'] = "Sorry! we couldn't find any results with the ingredients you have. You can shopping or we have suggestions"
+                json_dict['message'] = "Sorry! we couldn't find any results with the ingredients you have. Here are some suggestions where you might have to go to shopping"
             else:
                 json_dict['error'] = 0
                 clash_dict = [(0,sorted(clash_dict[0],key=lambda k:k[1]))]
@@ -351,7 +352,7 @@ def test():
             json_dict['error'] = 0
         if error==3:
             json_dict['error'] = error
-            json_dict['message'] = "Sorry! We coudnt find any results with the combination in the search box. But we have some suggestion"
+            json_dict['message'] = "Sorry! We coudnt find any recipes for the combination of your ingredients. But here are some suggestions from our side"
         print('success 1')
         print(json_dict)
         return json.dumps(json_dict)
@@ -400,6 +401,18 @@ def retrieve():
                      'https://images.pexels.com/photos/3298692/pexels-photo-3298692.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
                      'https://images.pexels.com/photos/2403392/pexels-photo-2403392.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940']
     random_titles = ['Everyday favourite!','Fine Dine!','Simple and Delicious','Make-Ahead Meal','Instant Pot Dish']
+    random_desc = ['An Everlasting Meal',
+                   'Fun and Delicious Stuffed Dishes',
+                   'Great Food Fast',
+                   'The Taste of Country Cooking',
+                   'Pursuit of Flavor',
+                   'Homemade no Time',
+                   'Fast and Easy',
+                   'Slow and Delicious',
+                   'Master the Art of Cooking ',
+                   'Fine Produce On The Table',
+                   'Fantastic Meal',
+                   'Small Recipe with a Big Flavor']
     args = request.args
     print(args)
     recipe_ids = args['recipe_list'].strip().split(',')
@@ -419,7 +432,11 @@ def retrieve():
         title = str(row[3]).strip()
         id = row[4]
         if desc.lower() == "none":
-            desc = "Fresh produce on your table"
+            description = random_desc[random.randint(0,len(random_desc)-1)]
+            if 'Master' in description:
+                desc = description+title
+            else:
+                desc = description
         if image_url.lower()=="none":
             image_url = random_images[random.randint(0,len(random_images)-1)]
         if title.lower() == "none":

@@ -20,6 +20,7 @@
             <!--这里是搜索框的内容-->
             <!--select这里会显示所选的内容-->
             <el-button slot="append" icon="el-icon-search" @click="handleSearchClick"></el-button>
+			<back-to-top></back-to-top>
             <!--          按下回车键既可以进行搜索-->
           </el-autocomplete>
           <section class="checkbox-area row">
@@ -28,6 +29,7 @@
               <el-checkbox label="I Can Go Shopping" style="color:white"></el-checkbox>
             </el-checkbox-group>
           </section>
+		  <p v-if="noresultsmessage.length" style="margin-left:25px;margin-top:20px;font-size:15px;letter-spacing: 2px;" class="text-color">{{noresultsmessage}}</p>
         </div>
         <div :class="{'blank':searchBarFixed}"></div>
 
@@ -37,6 +39,7 @@
               <loading v-if="isLoading"></loading>
             </transition>
           </div>
+		
         </section>-->
 
         <section class="collapse-area">
@@ -75,6 +78,7 @@
           <p v-if="loading" style="font-size:17px;letter-spacing: 2px;">{{ loading_text }}</p>
           <p v-if="message.length" style="margin-left:25px;font-size:17px;letter-spacing: 2px;" class="loading" >{{message}}</p>
 		  <p v-if="refresh_message.length" style="margin-left:25px;font-size:20px;letter-spacing: 2px;" class="text-color">{{refresh_message}}</p>
+		    
 		  </div>
         </section>
       </section>
@@ -304,6 +308,8 @@
 		loading: false,
 		refresh_button:true,
 		refresh_message:"",
+		
+		noresultsmessage:"",
 		//end added part
         inputValue: "",
       activeNames: [0],
@@ -443,6 +449,7 @@
 			
 			if(this.inputValue.length==0){
 				this.message = "Please type ingredients to search!"
+				this.check_imgs = this.imgs;
 				return;
 			}
 			this.loading = true;
@@ -482,9 +489,12 @@
       //每次取的时候先写个函数去修改它的key，image1=image+'1'这样
 	
       async handleSearchClick() {
+	  if(this.isCollapse){
+		await this.foldAll()}
+		this.noresultsmessage = "";
 		this.error = false;
 		this.refresh_button = true;
-				this.refresh_message = "";
+		this.refresh_message = "";
         await this.getData();
 		//this.imgs[0].desc=this.check_imgs[0].desc;
 		//this.retrieveData();
@@ -492,8 +502,11 @@
 		
 		this.imgs = this.check_imgs;
 		this.check_imgs = [];
-		this.imgs[0].desc = this.length_recipe_ids;
-		this.imgs[1].desc = this.error;
+		if(this.length_recipe_ids!=0){
+			this.noresultsmessage = "Hooray! we fetched "+this.length_recipe_ids+" delicious recipes for you:)"
+		}
+		//this.imgs[0].desc = this.length_recipe_ids;
+		//this.imgs[1].desc = this.error;
 		//this.imgs[0].desc = this.recipe_idslist;
 		//this.imgs[0].desc = this.res.data;
       },
