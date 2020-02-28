@@ -501,8 +501,7 @@
         //tempFlag.refresh = !tempFlag.refresh;
 		
 		this.imgs = this.check_imgs;
-		if(this.isCollapse){
-		await this.foldAll()}
+		
 		this.check_imgs = [];
 		if(this.length_recipe_ids!=0){
 			this.noresultsmessage = "Hooray! we fetched "+this.length_recipe_ids+" delicious recipes for you:)"
