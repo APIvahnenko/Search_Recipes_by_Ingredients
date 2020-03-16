@@ -14,6 +14,11 @@ In this project we performed:
 
 Please see the "report" folder for more details.
 
+Site landing page:
 <img src = "report/images/homePage.jpeg" width= "60%">
+
+Selection options:
 <img src = "report/images/SelectOptions.jpeg" width= "60%">
+
+Displayed Results:
 <img src = "report/images/serachResults.jpeg" width= "60%">
